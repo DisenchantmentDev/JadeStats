@@ -1,5 +1,6 @@
 use eframe::egui::CentralPanel;
 use egui::Context;
+use egui::SidePanel;
 use egui::TextStyle;
 use egui::TopBottomPanel;
 use egui::{FontFamily, FontId};
@@ -36,6 +37,14 @@ impl eframe::App for App {
                     .show(ui, |plot_ui| plot_ui.line(line));
             });
         });
+
+        SidePanel::left("FileList")
+            .default_width(200.0)
+            .max_width(400.0)
+            .min_width(200.0)
+            .show(ctx, |ui| {
+                ui.label("Saved Profiles");
+            });
     }
 }
 
