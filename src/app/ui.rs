@@ -1,3 +1,7 @@
+use std::fmt;
+use std::ptr::null;
+
+use analyzer_core::player::Player;
 use eframe::egui::CentralPanel;
 use eframe::egui::Window;
 use egui::Context;
@@ -18,6 +22,7 @@ pub struct App {
     username: String, //player username as they would input, ie WhaleMilk#PHUD
     state: State,
     graph_dimensions: (usize, usize), //columns / rows
+    loaded_player: Player,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
@@ -29,12 +34,33 @@ enum State {
     Loading,
 }
 
+#[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
+enum GraphType {
+    #[default]
+    GD15,
+    CSM,
+    DPM,
+    KP,
+}
+
+impl fmt::Display for GraphType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            Self::GD15 => write!(f, "GD@15"),
+            Self::CSM => write!(f, "CS/M"),
+            Self::DPM => write!(f, "D/M"),
+            Self::KP => write!(f, "KP%"),
+        }
+    }
+}
+
 impl Default for App {
     fn default() -> Self {
         Self {
             username: String::default(),
             state: State::Home,
             graph_dimensions: (2, 2),
+            loaded_player: Player::default(),
         }
     }
 }

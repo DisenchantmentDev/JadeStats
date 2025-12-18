@@ -30,6 +30,18 @@ pub struct Summoner {
     pub summoner_level: i64,
 }
 
+impl Default for Player {
+    fn default() -> Self {
+        Player {
+            ident: PlayerIdent::default(),
+            start_data: StartData::default(),
+            games: Games::default(),
+            interface: Interface::default(),
+            max_games: 30,
+        }
+    }
+}
+
 impl Player {
     pub fn new(raw_username: &str, api_key: String) -> Player {
         let mut inter = Interface::new(&api_key);
@@ -57,7 +69,7 @@ impl Player {
     }
 
     pub fn load_new_player(&mut self) {
-        let mut time = self.start_data.start_date.clone();
+        let mut time = self.start_data.start_date;
         let mut game_ids = self
             .interface
             .get_game_ids(&time.to_string(), &self.start_data.puuid)
@@ -112,7 +124,7 @@ impl Player {
             self.sort_games();
             return true;
         }
-        return false;
+        false
     }
 
     fn trim_games(&mut self) {

@@ -10,7 +10,7 @@ pub mod ranked_data;
 pub mod timeline;
 pub mod user_interface;
 
-#[derive(Deserialize, Serialize, Clone)]
+#[derive(Deserialize, Serialize, Clone, Default)]
 pub struct Interface {
     api_key: String,
     server: String,
