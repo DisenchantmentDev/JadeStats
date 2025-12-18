@@ -2,6 +2,7 @@
 
 mod app;
 pub use app::home::TemplateApp;
+pub use app::ui;
 pub use app::ui::App;
 
 pub trait View {

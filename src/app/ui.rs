@@ -1,17 +1,23 @@
 use eframe::egui::CentralPanel;
 use eframe::egui::Window;
 use egui::Context;
+use egui::Grid;
+use egui::ScrollArea;
 use egui::SidePanel;
 use egui::TextEdit;
 use egui::TextStyle;
 use egui::TopBottomPanel;
+use egui::Ui;
 use egui::{FontFamily, FontId};
-use egui_plot::{Line, Plot, PlotPoints};
+use egui_extras::{Size, Strip, StripBuilder};
+use egui_plot::{Line, Plot, PlotPoint, PlotPoints};
+
+pub mod stats_display;
 
 pub struct App {
     username: String, //player username as they would input, ie WhaleMilk#PHUD
-    state: State,     //Coul
-    test_bool: bool,
+    state: State,
+    graph_dimensions: (usize, usize), //columns / rows
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
@@ -28,69 +34,123 @@ impl Default for App {
         Self {
             username: String::default(),
             state: State::Home,
-            test_bool: false,
+            graph_dimensions: (2, 2),
         }
     }
 }
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
-        set_style(ctx);
-        top_bar(ctx);
-        //CentralPanel::default().show(ctx, |vi| vi.heading("JadeStats"));
-        CentralPanel::default().show(ctx, |ui| {
-            //match self.state {
-            //    State::Home =>
-            //}
-            if self.state == State::Home {
-                ui.vertical_centered_justified(|ui| {
-                    ui.set_max_width(200.0);
-                    ui.label("Enter Username");
-                    let input_box = ui.text_edit_singleline(&mut self.username);
-                    if input_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                        self.state = State::Stats;
-                    }
-                    if ui.button("Go!").clicked() {
-                        self.state = State::Stats;
-                    }
-                });
-            }
-
-            if self.state == State::Stats {
-                ui.vertical_centered_justified(|ui| {
-                    ui.label(format!("Current username: {}", self.username));
-                    ui.set_max_width(600.0);
-
-                    let sin: PlotPoints = (0..100)
-                        .map(|i| {
-                            let x = i as f64 * 0.1;
-                            [x, x.sin()]
-                        })
-                        .collect();
-                    let line = Line::new("sin_wave", sin);
-
-                    Plot::new("test_plot")
-                        .view_aspect(2.0)
-                        .show(ui, |plot_ui| plot_ui.line(line));
-                });
-            }
-        });
-
-        SidePanel::left("FileList")
-            .default_width(200.0)
-            .max_width(400.0)
-            .min_width(200.0)
-            .show(ctx, |ui| {
-                ui.label("Saved Profiles");
-            });
-
-        Window::new("TestWindow").show(ctx, |ui| {
-            ui.label("Test Window");
-        });
+        self.ui(ctx);
     }
 }
 
-impl App {}
+impl App {
+    fn ui(&mut self, ctx: &egui::Context) {
+        set_style(ctx);
+        top_bar(ctx);
+        //CentralPanel::default().show(ctx, |vi| vi.heading("JadeStats"));
+        SidePanel::left("FileList")
+            .default_width(300.0)
+            .min_width(100.0)
+            .max_width(500.0)
+            .resizable(true)
+            .show(ctx, |ui| {
+                ScrollArea::vertical().show(ui, |ui| {
+                    let available_width = ui.available_width();
+                    ui.heading("Profiles");
+                    ui.separator();
+                })
+            });
+
+        self.draw_central_panel(ctx);
+
+        //Window::new("TestWindow").show(ctx, |ui| {
+        //    ui.label("Test Window");
+        //});
+    }
+
+    fn draw_central_panel(&mut self, ctx: &egui::Context) {
+        CentralPanel::default().show(ctx, |ui| match self.state {
+            State::Home => {
+                self.home_central_panel(ui);
+            }
+            State::Stats => {
+                let sin: Vec<PlotPoint> = (0..1000)
+                    .map(|i| {
+                        let x = i as f64 * 0.01;
+                        PlotPoint::new(x, x.sin())
+                    })
+                    .collect();
+                ui.vertical_centered_justified(|ui| {
+                    //username label
+                    let max_width = ui.available_width();
+                    ui.set_max_width(200.0);
+                    ui.label(format!("Current username: {}", self.username));
+
+                    //graph grid
+                    ui.set_max_width(max_width);
+                    self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
+                    //StripBuilder::new(ui)
+                    //    //TODO: factor this nightmare out into smaller functions because this makes me feel
+                    //    //physical pain
+                    //    .sizes(
+                    //        Size::relative((self.graph_dimensions.0 as f32).recip()),
+                    //        self.graph_dimensions.0,
+                    //    )
+                    //    .vertical(|mut strip| {
+                    //        for r in 0..self.graph_dimensions.0 {
+                    //            strip.cell(|ui| {
+                    //                StripBuilder::new(ui)
+                    //                    .sizes(
+                    //                        egui_extras::Size::relative(
+                    //                            (self.graph_dimensions.1 as f32).recip(),
+                    //                        ),
+                    //                        self.graph_dimensions.1,
+                    //                    )
+                    //                    .horizontal(|mut strip| {
+                    //                        for c in 0..self.graph_dimensions.1 {
+                    //                            strip.cell(|ui| {
+                    //                                let i = r * self.graph_dimensions.0 + c;
+                    //                                Plot::new(format!("Plot{i}")).show(
+                    //                                    ui,
+                    //                                    |plot_ui| {
+                    //                                        plot_ui.line(
+                    //                                            Line::new(
+                    //                                                format!("curve{i}"),
+                    //                                                PlotPoints::Borrowed(&sin),
+                    //                                            )
+                    //                                            .name(format!("curve{i}")),
+                    //                                        );
+                    //                                    },
+                    //                                );
+                    //                            });
+                    //                        }
+                    //                    });
+                    //            });
+                    //        }
+                    //    });
+                });
+            }
+            State::Profile => {}
+            State::Loading => {}
+        });
+    }
+
+    fn home_central_panel(&mut self, ui: &mut Ui) {
+        ui.vertical_centered_justified(|ui| {
+            ui.set_max_width(200.0);
+            ui.label("Enter Username");
+            let input_box = ui.text_edit_singleline(&mut self.username);
+            if input_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                self.state = State::Stats;
+            }
+            if ui.button("Go!").clicked() {
+                self.state = State::Stats;
+            }
+        });
+    }
+}
 
 fn set_style(ctx: &Context) {
     let mut style = (*ctx.style()).clone();
@@ -105,10 +165,10 @@ fn set_style(ctx: &Context) {
 }
 
 fn top_bar(ctx: &Context) {
-    TopBottomPanel::top("menu_bar").show(ctx, |vi| {
-        egui::containers::menu::MenuBar::new().ui(vi, |vi| {
-            vi.menu_button("File", |vi| {
-                if vi.button("Exit").clicked() {
+    TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+        egui::containers::menu::MenuBar::new().ui(ui, |ui| {
+            ui.menu_button("File", |ui| {
+                if ui.button("Exit").clicked() {
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
                 }
             })

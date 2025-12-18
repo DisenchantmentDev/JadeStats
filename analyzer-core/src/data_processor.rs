@@ -1,8 +1,4 @@
 use serde_derive::{Deserialize, Serialize};
-use std::collections::HashMap;
-
-use crate::interface::match_data::MatchData;
-use crate::interface::timeline::Timeline;
 
 pub mod filter;
 
@@ -193,4 +189,3 @@ impl Games {
         };
     }
 }
-
