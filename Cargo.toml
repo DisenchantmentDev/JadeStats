@@ -29,6 +29,10 @@ egui_extras = "0.33.3"
 # You only need serde if you want app persistence:
 serde = { version = "1.0.219", features = ["derive"] }
 
+serde_json = "1.0.149"
+
+dotenv = "0.15.0"
+
 analyzer-core = {version = "0.2.0", path = "analyzer-core"}
 
 # native:

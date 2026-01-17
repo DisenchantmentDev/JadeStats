@@ -94,16 +94,14 @@ impl Player {
         );
     }
 
-    pub fn load_indexed_player(api_key: String, player_as_string: String) -> Player {
+    pub fn load_indexed_player(&mut self, player_as_string: String) {
         let save: Player = serde_json::from_str(&player_as_string).unwrap();
-        let mut inter = Interface::new(&api_key);
-        Player {
-            ident: save.ident,
-            start_data: save.start_data,
-            games: save.games,
-            interface: inter,
-            max_games: 30,
-        }
+        let inter = Interface::new(&self.start_data.api_key);
+        self.ident = save.ident;
+        self.start_data = save.start_data;
+        self.games = save.games;
+        self.interface = inter;
+        self.max_games = 30;
     }
 
     pub fn load_new_games(&mut self) -> bool {

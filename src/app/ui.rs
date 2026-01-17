@@ -1,25 +1,24 @@
 use std::fmt;
-use std::ptr::null;
 
 use analyzer_core::player::Player;
 use eframe::egui::CentralPanel;
-use eframe::egui::Window;
+//use eframe::egui::Window;
 use egui::Context;
-use egui::Grid;
 use egui::ScrollArea;
 use egui::SidePanel;
-use egui::TextEdit;
 use egui::TextStyle;
 use egui::TopBottomPanel;
 use egui::Ui;
 use egui::{FontFamily, FontId};
 use egui_extras::{Size, Strip, StripBuilder};
-use egui_plot::{Line, Plot, PlotPoint, PlotPoints};
 
+pub mod player_interface;
 pub mod stats_display;
+pub mod stats_page;
 
 pub struct App {
     username: String, //player username as they would input, ie WhaleMilk#PHUD
+    region: Regions,
     state: State,
     graph_dimensions: (usize, usize), //columns / rows
     loaded_player: Player,
@@ -43,6 +42,16 @@ enum GraphType {
     KP,
 }
 
+#[derive(Debug, Default, PartialEq)]
+enum Regions {
+    #[default]
+    NA,
+    EUW,
+    EUNE,
+    KR,
+    CN,
+}
+
 impl fmt::Display for GraphType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -53,11 +62,11 @@ impl fmt::Display for GraphType {
         }
     }
 }
-
 impl Default for App {
     fn default() -> Self {
         Self {
             username: String::default(),
+            region: Regions::NA,
             state: State::Home,
             graph_dimensions: (2, 2),
             loaded_player: Player::default(),
@@ -97,68 +106,21 @@ impl App {
     }
 
     fn draw_central_panel(&mut self, ctx: &egui::Context) {
+        /* drawing the central Panel w/ Graphs */
         CentralPanel::default().show(ctx, |ui| match self.state {
             State::Home => {
                 self.home_central_panel(ui);
             }
-            State::Stats => {
-                let sin: Vec<PlotPoint> = (0..1000)
-                    .map(|i| {
-                        let x = i as f64 * 0.01;
-                        PlotPoint::new(x, x.sin())
-                    })
-                    .collect();
-                ui.vertical_centered_justified(|ui| {
-                    //username label
-                    let max_width = ui.available_width();
-                    ui.set_max_width(200.0);
-                    ui.label(format!("Current username: {}", self.username));
 
-                    //graph grid
-                    ui.set_max_width(max_width);
-                    self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
-                    //StripBuilder::new(ui)
-                    //    //TODO: factor this nightmare out into smaller functions because this makes me feel
-                    //    //physical pain
-                    //    .sizes(
-                    //        Size::relative((self.graph_dimensions.0 as f32).recip()),
-                    //        self.graph_dimensions.0,
-                    //    )
-                    //    .vertical(|mut strip| {
-                    //        for r in 0..self.graph_dimensions.0 {
-                    //            strip.cell(|ui| {
-                    //                StripBuilder::new(ui)
-                    //                    .sizes(
-                    //                        egui_extras::Size::relative(
-                    //                            (self.graph_dimensions.1 as f32).recip(),
-                    //                        ),
-                    //                        self.graph_dimensions.1,
-                    //                    )
-                    //                    .horizontal(|mut strip| {
-                    //                        for c in 0..self.graph_dimensions.1 {
-                    //                            strip.cell(|ui| {
-                    //                                let i = r * self.graph_dimensions.0 + c;
-                    //                                Plot::new(format!("Plot{i}")).show(
-                    //                                    ui,
-                    //                                    |plot_ui| {
-                    //                                        plot_ui.line(
-                    //                                            Line::new(
-                    //                                                format!("curve{i}"),
-                    //                                                PlotPoints::Borrowed(&sin),
-                    //                                            )
-                    //                                            .name(format!("curve{i}")),
-                    //                                        );
-                    //                                    },
-                    //                                );
-                    //                            });
-                    //                        }
-                    //                    });
-                    //            });
-                    //        }
-                    //    });
-                });
+            State::Stats => {
+                self.load_player();
+                self.draw_stats(ui);
+                //graph grid
+                //self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
             }
-            State::Profile => {}
+            State::Profile => {
+                let temp = 100;
+            }
             State::Loading => {}
         });
     }
@@ -167,10 +129,25 @@ impl App {
         ui.vertical_centered_justified(|ui| {
             ui.set_max_width(200.0);
             ui.label("Enter Username");
-            let input_box = ui.text_edit_singleline(&mut self.username);
-            if input_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                self.state = State::Stats;
-            }
+            ui.horizontal(|ui| {
+                //text enter box
+                let input_box = ui.text_edit_singleline(&mut self.username);
+                //region selection box
+                egui::ComboBox::from_id_salt("Region_Box")
+                    .width(50.0)
+                    .selected_text(format!("{:?}", self.region))
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(&mut self.region, Regions::NA, "NA");
+                        ui.selectable_value(&mut self.region, Regions::EUW, "EUW");
+                        ui.selectable_value(&mut self.region, Regions::EUNE, "EUNE");
+                        ui.selectable_value(&mut self.region, Regions::KR, "KR");
+                        ui.selectable_value(&mut self.region, Regions::CN, "CN");
+                    });
+
+                if input_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
+                    self.state = State::Stats;
+                }
+            });
             if ui.button("Go!").clicked() {
                 self.state = State::Stats;
             }
