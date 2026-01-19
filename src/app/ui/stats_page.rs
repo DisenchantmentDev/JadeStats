@@ -10,6 +10,39 @@ impl App {
         /* Generate Vec<PlotPoint> for each graph
          * Generate a graph for each one (edit how drawing the strip works)
          * draw that here */
+
+        let g_gd15: Vec<PlotPoint> = self
+            .loaded_player
+            .gd15_points()
+            .into_iter()
+            .enumerate()
+            .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
+            .collect();
+
+        let g_csm: Vec<PlotPoint> = self
+            .loaded_player
+            .csm_points()
+            .into_iter()
+            .enumerate()
+            .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
+            .collect();
+
+        let g_dpm: Vec<PlotPoint> = self
+            .loaded_player
+            .dpm_points()
+            .into_iter()
+            .enumerate()
+            .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
+            .collect();
+
+        let g_kp: Vec<PlotPoint> = self
+            .loaded_player
+            .kp_points()
+            .into_iter()
+            .enumerate()
+            .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
+            .collect();
+
         let sin: Vec<PlotPoint> = (0..1000)
             .map(|i| {
                 let x = i as f64 * 0.01;

@@ -146,4 +146,36 @@ impl Player {
     pub fn is_empty_games(&self) -> bool {
         self.clone().games.is_empty()
     }
+
+    pub fn gd15_points(&self) -> Vec<i32> {
+        let mut out = Vec::new();
+        for g in &self.games.games {
+            out.push(g.graph_data.gd15);
+        }
+        out
+    }
+
+    pub fn csm_points(&self) -> Vec<f32> {
+        let mut out = Vec::new();
+        for g in &self.games.games {
+            out.push(g.graph_data.csm);
+        }
+        out
+    }
+
+    pub fn dpm_points(&self) -> Vec<f32> {
+        let mut out = Vec::new();
+        for g in &self.games.games {
+            out.push(g.graph_data.dpm);
+        }
+        out
+    }
+
+    pub fn kp_points(&self) -> Vec<f32> {
+        let mut out = Vec::new();
+        for g in &self.games.games {
+            out.push(g.graph_data.kp);
+        }
+        out
+    }
 }
