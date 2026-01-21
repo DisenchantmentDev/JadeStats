@@ -9,9 +9,10 @@ use egui::SidePanel;
 use egui::TextStyle;
 use egui::TopBottomPanel;
 use egui::Ui;
-use egui::{FontFamily, FontId};
+use egui::{Color32, FontFamily, FontId, RichText};
 use egui_extras::{Size, Strip, StripBuilder};
 
+use crate::app::app_error::AppError;
 pub mod player_interface;
 pub mod stats_display;
 pub mod stats_page;
@@ -21,7 +22,9 @@ pub struct App {
     region: Regions,
     state: State,
     graph_dimensions: (usize, usize), //columns / rows
+    has_loaded: bool,
     loaded_player: Player,
+    err: Option<AppError>, // Error field that tracks if there is an error thrown by player interface
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
@@ -69,7 +72,9 @@ impl Default for App {
             region: Regions::NA,
             state: State::Home,
             graph_dimensions: (2, 2),
+            has_loaded: false,
             loaded_player: Player::default(),
+            err: None,
         }
     }
 }
@@ -113,8 +118,20 @@ impl App {
             }
 
             State::Stats => {
-                self.load_player();
-                self.draw_stats(ui);
+                if !self.has_loaded {
+                    match self.load_player() {
+                        Ok(_) => {
+                            self.has_loaded = true;
+                            self.draw_stats(ui);
+                        }
+                        Err(e) => {
+                            self.state = State::Home;
+                            self.err = Some(e);
+                        }
+                    }
+                } else {
+                    self.draw_stats(ui);
+                }
                 //graph grid
                 //self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
             }
@@ -126,8 +143,20 @@ impl App {
     }
 
     fn home_central_panel(&mut self, ui: &mut Ui) {
+        //another ui element that we can fill with red color w/ text; separate from text box ui
         ui.vertical_centered_justified(|ui| {
             ui.set_max_width(200.0);
+            //TODO: if there is an error, draw a rich text above everything, maybe in a red box?
+            if let Some(e) = &self.err {
+                ui.label(
+                    RichText::new(format!(
+                        "There was an error\nplease try again\n{}",
+                        e.details
+                    ))
+                    .color(Color32::RED),
+                );
+            }
+
             ui.label("Enter Username");
             ui.horizontal(|ui| {
                 //text enter box

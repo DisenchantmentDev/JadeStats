@@ -16,14 +16,15 @@ impl Interface {
     ) -> Result<Vec<String>, Box<dyn Error>> {
         //todo!();
         let mut ids = Vec::new();
+        let url_server = Self::get_server(&self.server);
         println!(
-            "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids{}api_key={}",
-            self.server, puuid, start_timestamp, self.api_key
+            "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?start={}&api_key={}",
+            url_server, puuid, start_timestamp, self.api_key
         );
         let resp = reqwest::blocking::get(
             format!(
                 "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime={}&api_key={}",
-                self.server, puuid, start_timestamp, self.api_key)
+                url_server, puuid, start_timestamp, self.api_key)
             ).unwrap().text().unwrap();
         println!("{}", resp);
         let mut deserializer = Deserializer::from_str(&resp);
@@ -62,7 +63,9 @@ impl Interface {
     fn request_game_data(&self, id: &String) -> Result<MatchData, Box<dyn Error>> {
         let resp = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/match/v5/matches/{}?api_key={}",
-            &self.server, id, self.api_key
+            Self::get_server(&self.server),
+            id,
+            self.api_key
         ))
         .unwrap()
         .text()
@@ -74,7 +77,9 @@ impl Interface {
     fn request_match_timeline(&self, id: &String) -> Result<Timeline, Box<dyn Error>> {
         let resp = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/match/v5/matches/{}/timeline?api_key={}",
-            self.server, id, self.api_key
+            Self::get_server(&self.server),
+            id,
+            self.api_key
         ))
         .unwrap()
         .text()
@@ -83,4 +88,3 @@ impl Interface {
         Ok(out)
     }
 }
-

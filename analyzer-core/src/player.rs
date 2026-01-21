@@ -1,6 +1,6 @@
+use crate::StartData;
 use crate::data_processor::Games;
 use crate::interface::Interface;
-use crate::{StartData, player};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
@@ -42,17 +42,19 @@ impl Default for Player {
     }
 }
 
+#[allow(clippy::allow_attributes, clippy::redundant_field_names)]
 impl Player {
     pub fn new(raw_username: &str, api_key: String) -> Player {
         let mut inter = Interface::new(&api_key);
         println!("Creating new player {}", raw_username);
-        let start_of_day = Utc::now()
-            .date_naive()
-            .and_hms_opt(0, 0, 0)
-            .unwrap()
-            .and_local_timezone(Utc)
-            .unwrap()
-            .timestamp();
+        //let start_of_day = Utc::now()
+        //    .date_naive()
+        //    .and_hms_opt(0, 0, 0)
+        //    .unwrap()
+        //    .and_local_timezone(Utc)
+        //    .unwrap()
+        //    .timestamp();
+        let start_of_day = Utc::now().timestamp() - 86400;
         let ident = inter.gen_player_ident_from_string(raw_username);
         Player {
             ident: ident.clone(),

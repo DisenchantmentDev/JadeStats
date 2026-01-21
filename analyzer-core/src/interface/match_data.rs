@@ -78,6 +78,7 @@ pub struct Participant {
     pub command_pings: i64,
     pub consumables_purchased: i64,
     pub damage_dealt_to_buildings: i64,
+    pub damage_dealt_to_epic_monsters: i64,
     pub damage_dealt_to_objectives: i64,
     pub damage_dealt_to_turrets: i64,
     pub damage_self_mitigated: i64,
@@ -152,6 +153,7 @@ pub struct Participant {
     pub riot_id_game_name: String,
     pub riot_id_tagline: String,
     pub role: String,
+    pub role_bound_item: i64,
     pub sight_wards_bought_in_game: i64,
     #[serde(rename = "spell1Casts")]
     pub spell1casts: i64,
@@ -314,7 +316,6 @@ pub struct Challenges {
     pub perfect_dragon_souls_taken: i64,
     pub perfect_game: i64,
     pub pick_kill_with_ally: i64,
-    #[serde(skip)]
     pub played_champ_select_position: i64,
     pub poro_explosions: i64,
     pub quick_cleanse: i64,
@@ -361,13 +362,13 @@ pub struct Challenges {
     pub jungler_kills_early_jungle: Option<i64>,
     pub kills_on_laners_early_jungle_as_jungler: Option<i64>,
     pub control_ward_time_coverage_in_river_or_enemy_half: Option<f64>,
-    pub highest_ward_kills: Option<i64>,
     pub first_turret_killed_time: Option<f64>,
-    pub solo_turrets_lategame: Option<i64>,
-    pub earliest_dragon_takedown: Option<f64>,
     pub highest_champion_damage: Option<i64>,
-    pub faster_support_quest_completion: Option<i64>,
+    pub shortest_time_to_ace_from_first_takedown: Option<f64>,
+    pub earliest_dragon_takedown: Option<f64>,
     pub highest_crowd_control_score: Option<i64>,
+    pub faster_support_quest_completion: Option<i64>,
+    pub highest_ward_kills: Option<i64>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

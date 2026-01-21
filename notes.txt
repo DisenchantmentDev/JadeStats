@@ -1,0 +1,7 @@
+- Use pathbuf instead of format!("dir");
+- thiserr
+- listen to clippy
+
+2GdP5mZbWdZfDvidjWKUUUMLQgkLPcmFPUy1xd0HG4Gk4Qbwr_JbAVZScKsHfchxItpWQxdny8oq8g
+
+let base_path = PathBuf::new("run/media/whale/Project Storage/JadeStats); let profile_path = base_path.join("assets/profiles"); let profile_file = profile_path.join(user_name).with_extension("json");

@@ -3,7 +3,6 @@ use egui_extras::{Size, StripBuilder};
 use egui_plot::{Line, Plot, PlotPoint, PlotPoints};
 
 use crate::ui::App;
-use crate::ui::GraphType;
 
 impl App {
     pub fn draw_stats(&mut self, ui: &mut Ui) {
@@ -43,28 +42,31 @@ impl App {
             .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
             .collect();
 
-        let sin: Vec<PlotPoint> = (0..1000)
-            .map(|i| {
-                let x = i as f64 * 0.01;
-                PlotPoint::new(x, x.sin())
-            })
-            .collect();
+        //let sin: Vec<PlotPoint> = (0..1000)
+        //    .map(|i| {
+        //        let x = i as f64 * 0.01;
+        //        PlotPoint::new(x, x.sin())
+        //    })
+        //    .collect();
 
-        let cosin: Vec<PlotPoint> = (0..1000)
-            .map(|i| {
-                let x = i as f64 * 0.01;
-                PlotPoint::new(x, x.cos())
-            })
-            .collect();
+        //let cosin: Vec<PlotPoint> = (0..1000)
+        //    .map(|i| {
+        //        let x = i as f64 * 0.01;
+        //        PlotPoint::new(x, x.cos())
+        //    })
+        //    .collect();
 
-        let graphs: Vec<Vec<PlotPoint>> =
-            vec![sin.clone(), cosin.clone(), cosin.clone(), sin.clone()];
+        //let graphs: Vec<Vec<PlotPoint>> = vec![g_gd15, g_csm, g_dpm, g_kp];
+        let graphs: Vec<Vec<PlotPoint>> = vec![g_gd15, g_csm, g_dpm, g_kp];
 
         ui.vertical_centered_justified(|ui| {
             //username label
             let max_width = ui.available_width();
             ui.set_max_width(200.0);
-            ui.label(format!("Current user: {}#{:?}", self.username, self.region));
+            ui.label(format!(
+                "Current user: {} ({:?})",
+                self.username, self.region
+            ));
 
             //graph grid
             ui.set_max_width(max_width);

@@ -19,7 +19,10 @@ impl Interface {
         }
         let account = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/riot/account/v1/accounts/by-riot-id/{}/{}?api_key={}",
-            &self.server, game_name, tagline, self.api_key
+            Self::get_server(&self.server),
+            game_name,
+            tagline,
+            self.api_key
         ))
         .unwrap()
         .json::<Account>()
@@ -27,7 +30,7 @@ impl Interface {
 
         let summ = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{}?api_key={}",
-            Self::get_legacy_server(&self.server.as_str()),
+            Self::get_legacy_server(self.server.as_str()),
             account.puuid,
             self.api_key
         )) //figure out the server for the url. Maybe local match?
@@ -54,4 +57,3 @@ impl Interface {
         }
     }
 }
-

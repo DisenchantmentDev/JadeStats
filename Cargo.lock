@@ -1824,6 +1824,7 @@ dependencies = [
  "egui_plot",
  "env_logger",
  "log",
+ "project-root",
  "serde",
  "serde_json",
  "wasm-bindgen-futures",
@@ -2740,6 +2741,12 @@ name = "profiling"
 version = "1.0.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3eb8486b569e12e2c32ad3e204dbaba5e4b5b216e9367044f25f1dba42341773"
+
+[[package]]
+name = "project-root"
+version = "0.2.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8bccbff07d5ed689c4087d20d7307a52ab6141edeedf487c3876a55b86cf63df"
 
 [[package]]
 name = "quick-xml"
