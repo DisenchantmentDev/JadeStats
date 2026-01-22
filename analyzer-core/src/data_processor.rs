@@ -72,6 +72,7 @@ pub struct Games {
     pub games: Vec<Game>,
 }
 
+#[allow(clippy::allow_attributes, clippy::redundant_field_names)]
 impl Games {
     pub fn new(raw_data: Vec<RawData>) -> Games {
         //for each item in raw_data, generate a relevant graph data vec, then insert into game vec
@@ -122,70 +123,61 @@ impl Games {
 
         GraphData {
             puuid: id.to_string(),
-            game_start: data.game_end.clone(),
-            game_end: data.game_end.clone(),
+            game_start: data.game_end,
+            game_end: data.game_end,
             position: data.me.pos.clone(),
             champion: data.me.champ.clone(),
-            gd15: Self::calc_gd(&data, &side, &p_index),
-            csm: Self::find_csm(&data, &side, &p_index),
-            dpm: Self::find_dpm(&data, &side, &p_index),
-            kp: Self::find_kp(&data, &side, &p_index),
-            wl: Self::find_wl(&data, &side, &p_index),
+            gd15: Self::calc_gd(data, &side, &p_index),
+            csm: Self::find_csm(data, &side, &p_index),
+            dpm: Self::find_dpm(data, &side, &p_index),
+            kp: Self::find_kp(data, &side, &p_index),
+            wl: Self::find_wl(data, &side, &p_index),
         }
         //todo!();
     }
 
     fn calc_gd(game: &RawData, side: &Side, p_index: &usize) -> i32 {
-        let gd = match side {
+        match side {
             Side::BLUE => game.g15[*p_index].0 - game.g15[*p_index].1,
             Side::RED => game.g15[*p_index].1 - game.g15[*p_index].0,
-        };
-        return gd;
+        }
     }
 
     fn find_csm(game: &RawData, side: &Side, p_index: &usize) -> f32 {
-        let csm = match side {
+        match side {
             Side::BLUE => game.csm[*p_index].0,
             Side::RED => game.csm[*p_index].1,
-        };
-
-        return csm;
+        }
     }
 
     fn find_dpm(game: &RawData, side: &Side, p_index: &usize) -> f32 {
-        let dpm = match side {
+        match side {
             Side::BLUE => game.dpm[*p_index].0,
             Side::RED => game.dpm[*p_index].1,
-        };
-
-        return dpm;
+        }
     }
 
     fn find_kp(game: &RawData, side: &Side, p_index: &usize) -> f32 {
-        let kp = match side {
+        match side {
             Side::BLUE => game.kp[*p_index].0,
             Side::RED => game.kp[*p_index].1,
-        };
-
-        return kp;
+        }
     }
 
     fn find_wl(game: &RawData, side: &Side, p_index: &usize) -> bool {
-        let wl = match side {
+        match side {
             Side::BLUE => game.win_loss.0,
             Side::RED => game.win_loss.1,
-        };
-
-        return wl;
+        }
     }
 
     fn get_index_from_pos(pos: &Position) -> usize {
-        return match pos {
+        match pos {
             Position::TOP => 0,
             Position::JUNGLE => 1,
             Position::MIDDLE => 2,
             Position::BOTTOM => 3,
             Position::SUPPORT => 4,
-        };
+        }
     }
 }

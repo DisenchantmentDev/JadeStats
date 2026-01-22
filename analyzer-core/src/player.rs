@@ -1,6 +1,6 @@
-use crate::StartData;
 use crate::data_processor::Games;
 use crate::interface::Interface;
+use crate::{StartData, api_error::ApiError};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
@@ -44,7 +44,7 @@ impl Default for Player {
 
 #[allow(clippy::allow_attributes, clippy::redundant_field_names)]
 impl Player {
-    pub fn new(raw_username: &str, api_key: String) -> Player {
+    pub fn new(raw_username: &str, api_key: String) -> Result<Player, ApiError> {
         let mut inter = Interface::new(&api_key);
         println!("Creating new player {}", raw_username);
         //let start_of_day = Utc::now()
@@ -55,8 +55,8 @@ impl Player {
         //    .unwrap()
         //    .timestamp();
         let start_of_day = Utc::now().timestamp() - 86400;
-        let ident = inter.gen_player_ident_from_string(raw_username);
-        Player {
+        let ident = inter.gen_player_ident_from_string(raw_username)?;
+        Ok(Player {
             ident: ident.clone(),
             start_data: StartData {
                 api_key: api_key,
@@ -67,64 +67,59 @@ impl Player {
             games: Games::default(),
             interface: inter,
             max_games: 30,
-        }
+        })
     }
 
-    pub fn load_new_player(&mut self) {
+    pub fn load_new_player(&mut self) -> Result<(), ApiError> {
         let mut time = self.start_data.start_date;
         let mut game_ids = self
             .interface
-            .get_game_ids(&time.to_string(), &self.start_data.puuid)
-            .unwrap();
+            .get_game_ids(&time.to_string(), &self.start_data.puuid)?;
         //TODO: check if we have fewer than 15 games, then check again with backed up timestamp
         let mut count = 0;
         while game_ids.len() < 15 {
             time -= 86400;
-            if count > 30 {
-                break;
+            if count > 14 {
+                return Err(ApiError::new("Player does not have enough games"));
             }
             count += 1;
             game_ids = self
                 .interface
-                .get_game_ids(&time.to_string(), &self.start_data.puuid)
-                .unwrap();
+                .get_game_ids(&time.to_string(), &self.start_data.puuid)?;
         }
         self.games = Games::new(
             self.interface
-                .get_match_data_collection(game_ids, &self.start_data.puuid)
-                .unwrap(),
+                .get_match_data_collection(game_ids, &self.start_data.puuid)?,
         );
+        Ok(())
     }
 
-    pub fn load_indexed_player(&mut self, player_as_string: String) {
-        let save: Player = serde_json::from_str(&player_as_string).unwrap();
+    pub fn load_indexed_player(&mut self, player_as_string: String) -> Result<(), ApiError> {
+        let save: Player = serde_json::from_str(&player_as_string)?;
         let inter = Interface::new(&self.start_data.api_key);
         self.ident = save.ident;
         self.start_data = save.start_data;
         self.games = save.games;
         self.interface = inter;
         self.max_games = 30;
+        Ok(())
     }
 
-    pub fn load_new_games(&mut self) -> bool {
-        let new_games = self
-            .interface
-            .get_game_ids(
-                &self.games.last_game_end().to_string(),
-                &self.start_data.puuid,
-            )
-            .unwrap();
+    pub fn load_new_games(&mut self) -> Result<bool, ApiError> {
+        let new_games = self.interface.get_game_ids(
+            &self.games.last_game_end().to_string(),
+            &self.start_data.puuid,
+        )?;
         if !new_games.is_empty() {
             self.games.append_games(
                 self.interface
-                    .get_match_data_collection(new_games, &self.start_data.puuid)
-                    .unwrap(),
+                    .get_match_data_collection(new_games, &self.start_data.puuid)?,
             );
             self.trim_games();
             self.sort_games();
-            return true;
+            return Ok(true);
         }
-        false
+        Ok(false)
     }
 
     fn trim_games(&mut self) {

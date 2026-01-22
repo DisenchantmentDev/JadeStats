@@ -20,7 +20,7 @@ impl App {
     pub fn load_player(&mut self) -> Result<(), AppError> {
         let api_key = Self::get_api_key();
         let raw_username = format!("{}#{:?}", self.username, self.region);
-        self.loaded_player = Player::new(raw_username.as_str(), api_key);
+        self.loaded_player = Player::new(raw_username.as_str(), api_key)?;
 
         //create path here once and the .join() to it
         let profile_path: PathBuf = [
@@ -40,12 +40,12 @@ impl App {
 
         if Self::indexed_players_contains(&raw_username)? {
             let player_as_str = fs::read_to_string(profile_path.clone())?;
-            self.loaded_player.load_indexed_player(player_as_str);
-            self.loaded_player.load_new_games();
+            self.loaded_player.load_indexed_player(player_as_str)?;
+            self.loaded_player.load_new_games()?;
         } else {
             Self::update_index_file(raw_username.clone())?;
             File::create(profile_path.clone())?;
-            self.loaded_player.load_new_player();
+            self.loaded_player.load_new_player()?;
         }
 
         let mut player_file = OpenOptions::new().write(true).open(profile_path.clone())?;
@@ -77,7 +77,7 @@ impl App {
             profiles: Vec<String>,
         }
         let mut buf = String::new();
-        println!("Path: {:?}", indexed_profile_path);
+        //println!("Path: {:?}", indexed_profile_path);
         OpenOptions::new()
             .read(true)
             .open(indexed_profile_path)?

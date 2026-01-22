@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+use crate::api_error::ApiError;
 use crate::interface::match_data::MatchData;
 use crate::interface::timeline::Timeline;
 use crate::player::PlayerIdent;
@@ -24,13 +25,14 @@ impl Interface {
         }
     }
 
-    pub fn gen_player_ident_from_string(&mut self, raw_username: &str) -> PlayerIdent {
+    pub fn gen_player_ident_from_string(
+        &mut self,
+        raw_username: &str,
+    ) -> Result<PlayerIdent, ApiError> {
         let p: Vec<&str> = raw_username.split("#").collect();
-        println!("{:?}", p.clone());
+        println!("{:?}", p);
         self.server = String::from(p[2]);
-        println!("Server is: {}", self.server.clone());
         self.request_player_data(String::from(p[0]).replace(" ", "%20"), String::from(p[1]))
-            .unwrap()
     }
 
     pub fn get_server(server: &str) -> &str {

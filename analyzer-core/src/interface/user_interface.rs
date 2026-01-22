@@ -1,15 +1,15 @@
+use crate::api_error::ApiError;
 use crate::interface::Interface;
 use crate::player::{PlayerIdent, Summoner};
 
 use serde::Deserialize;
-use std::error::Error;
 
 impl Interface {
     pub fn request_player_data(
         &self,
         game_name: String,
         tagline: String,
-    ) -> Result<PlayerIdent, Box<dyn Error>> {
+    ) -> Result<PlayerIdent, ApiError> {
         #[derive(Deserialize)]
         #[serde(rename_all = "camelCase")]
         struct Account {
@@ -23,20 +23,16 @@ impl Interface {
             game_name,
             tagline,
             self.api_key
-        ))
-        .unwrap()
-        .json::<Account>()
-        .unwrap();
+        ))?
+        .json::<Account>()?;
 
         let summ = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/summoner/v4/summoners/by-puuid/{}?api_key={}",
             Self::get_legacy_server(self.server.as_str()),
             account.puuid,
             self.api_key
-        )) //figure out the server for the url. Maybe local match?
-        .unwrap()
-        .json::<Summoner>()
-        .unwrap();
+        ))? //figure out the server for the url. Maybe local match?
+        .json::<Summoner>()?;
 
         Ok(PlayerIdent {
             summoner: summ,

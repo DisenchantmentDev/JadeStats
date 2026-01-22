@@ -142,6 +142,7 @@ pub struct ParticipantFrames {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n1 {
     pub champion_stats: ChampionStats,
     pub current_gold: i64,
@@ -213,6 +214,7 @@ pub struct Position2 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n2 {
     pub champion_stats: ChampionStats2,
     pub current_gold: i64,
@@ -284,6 +286,7 @@ pub struct Position3 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n3 {
     pub champion_stats: ChampionStats3,
     pub current_gold: i64,
@@ -355,6 +358,7 @@ pub struct Position4 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n4 {
     pub champion_stats: ChampionStats4,
     pub current_gold: i64,
@@ -426,6 +430,7 @@ pub struct Position5 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n5 {
     pub champion_stats: ChampionStats5,
     pub current_gold: i64,
@@ -497,6 +502,7 @@ pub struct Position6 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n6 {
     pub champion_stats: ChampionStats6,
     pub current_gold: i64,
@@ -568,6 +574,7 @@ pub struct Position7 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n7 {
     pub champion_stats: ChampionStats7,
     pub current_gold: i64,
@@ -639,6 +646,7 @@ pub struct Position8 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n8 {
     pub champion_stats: ChampionStats8,
     pub current_gold: i64,
@@ -710,6 +718,7 @@ pub struct Position9 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n9 {
     pub champion_stats: ChampionStats9,
     pub current_gold: i64,
@@ -781,6 +790,7 @@ pub struct Position10 {
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
+#[allow(non_camel_case_types)]
 pub struct n10 {
     pub champion_stats: ChampionStats10,
     pub current_gold: i64,

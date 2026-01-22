@@ -151,10 +151,11 @@ impl App {
                 ui.label(
                     RichText::new(format!(
                         "There was an error\nplease try again\n{}",
-                        e.details
+                        &e.details
                     ))
                     .color(Color32::RED),
                 );
+                //println!("{}", e.details);
             }
 
             ui.label("Enter Username");
@@ -187,8 +188,11 @@ impl App {
 fn set_style(ctx: &Context) {
     let mut style = (*ctx.style()).clone();
     style.text_styles = [
-        (TextStyle::Heading, FontId::new(30.0, FontFamily::Monospace)),
-        (TextStyle::Body, FontId::new(18.0, FontFamily::Monospace)),
+        (
+            TextStyle::Heading,
+            FontId::new(30.0, FontFamily::Proportional),
+        ),
+        (TextStyle::Body, FontId::new(18.0, FontFamily::Proportional)),
         (TextStyle::Button, FontId::new(14.0, FontFamily::Monospace)),
         (TextStyle::Small, FontId::new(14.0, FontFamily::Monospace)),
     ]

@@ -1,6 +1,7 @@
-pub mod player;
-pub mod interface;
+pub mod api_error;
 pub mod data_processor;
+pub mod interface;
+pub mod player;
 pub mod save;
 
 use serde_derive::{Deserialize, Serialize};

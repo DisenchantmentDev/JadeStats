@@ -1,3 +1,4 @@
+use crate::api_error::ApiError;
 use crate::data_processor::Game;
 use crate::data_processor::RawData;
 use crate::interface::Interface;
@@ -13,14 +14,14 @@ impl Interface {
         &self,
         start_timestamp: &String,
         puuid: &String,
-    ) -> Result<Vec<String>, Box<dyn Error>> {
+    ) -> Result<Vec<String>, ApiError> {
         //todo!();
         let mut ids = Vec::new();
         let url_server = Self::get_server(&self.server);
-        println!(
-            "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?start={}&api_key={}",
-            url_server, puuid, start_timestamp, self.api_key
-        );
+        //println!(
+        //    "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?start={}&api_key={}",
+        //    url_server, puuid, start_timestamp, self.api_key
+        //);
         let resp = reqwest::blocking::get(
             format!(
                 "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime={}&api_key={}",
@@ -28,7 +29,8 @@ impl Interface {
             ).unwrap().text().unwrap();
         println!("{}", resp);
         let mut deserializer = Deserializer::from_str(&resp);
-        Deserialize::deserialize_in_place(&mut deserializer, &mut ids).unwrap();
+        Deserialize::deserialize_in_place(&mut deserializer, &mut ids)?;
+        ids.reverse();
         Ok(ids)
     }
 
@@ -36,7 +38,7 @@ impl Interface {
         &self,
         ids: Vec<String>,
         puuid: &String,
-    ) -> Result<Vec<RawData>, Box<dyn Error>> {
+    ) -> Result<Vec<RawData>, ApiError> {
         let mut out: Vec<RawData> = Vec::new();
         let check_valid_game = |game: &MatchData| -> bool {
             if game.info.end_of_game_result != "GameComplete"
@@ -49,9 +51,9 @@ impl Interface {
         };
 
         for id in &ids {
-            let game_data = self.request_game_data(id).unwrap();
+            let game_data = self.request_game_data(id)?;
             if check_valid_game(&game_data) {
-                let game_tl = self.request_match_timeline(id).unwrap();
+                let game_tl = self.request_match_timeline(id)?;
                 let mut raw = RawData::new(&game_data, &game_tl);
                 raw.find_me(puuid);
                 out.push(raw);
@@ -60,30 +62,26 @@ impl Interface {
         Ok(out)
     }
 
-    fn request_game_data(&self, id: &String) -> Result<MatchData, Box<dyn Error>> {
+    fn request_game_data(&self, id: &String) -> Result<MatchData, ApiError> {
         let resp = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/match/v5/matches/{}?api_key={}",
             Self::get_server(&self.server),
             id,
             self.api_key
-        ))
-        .unwrap()
-        .text()
-        .unwrap();
+        ))?
+        .text()?;
         let game: MatchData = serde_json::from_str(&resp)?;
         Ok(game)
     }
 
-    fn request_match_timeline(&self, id: &String) -> Result<Timeline, Box<dyn Error>> {
+    fn request_match_timeline(&self, id: &String) -> Result<Timeline, ApiError> {
         let resp = reqwest::blocking::get(format!(
             "https://{}.api.riotgames.com/lol/match/v5/matches/{}/timeline?api_key={}",
             Self::get_server(&self.server),
             id,
             self.api_key
-        ))
-        .unwrap()
-        .text()
-        .unwrap();
+        ))?
+        .text()?;
         let out: Timeline = serde_json::from_str(&resp)?;
         Ok(out)
     }

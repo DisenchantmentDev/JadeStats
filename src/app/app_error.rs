@@ -44,3 +44,11 @@ impl From<serde_json::Error> for AppError {
         }
     }
 }
+
+impl From<analyzer_core::api_error::ApiError> for AppError {
+    fn from(e: analyzer_core::api_error::ApiError) -> Self {
+        Self {
+            details: e.to_string(),
+        }
+    }
+}
