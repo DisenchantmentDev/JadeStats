@@ -18,10 +18,17 @@ pub struct Interface {
 }
 
 impl Interface {
-    pub fn new(api_key: &String) -> Interface {
-        Interface {
+    pub fn new(api_key: &String) -> Self {
+        Self {
             api_key: api_key.clone(),
             server: String::default(),
+        }
+    }
+
+    pub fn new_with_server(api_key: &String, s: String) -> Self {
+        Self {
+            api_key: api_key.clone(),
+            server: s,
         }
     }
 

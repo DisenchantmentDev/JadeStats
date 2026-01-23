@@ -1,17 +1,24 @@
-use egui::Ui;
+use egui::{Color32, Ui};
 use egui_extras::{Size, StripBuilder};
-use egui_plot::{Line, Plot, PlotPoint, PlotPoints};
+use egui_plot::{Legend, Line, MarkerShape, Plot, PlotPoint, PlotPoints, Points};
+use std::vec::Vec;
 
 use crate::ui::App;
 use crate::ui::GraphType;
+
+//impl From<Vec<PlotPoint>> for PlotPoints<'_> {
+//    fn from(p: Vec<PlotPoint>) -> Self {
+//        p.iter().enumerate().map(|i| i).collect()
+//    }
+//}
 
 impl App {
     pub fn draw_stat_graph_strip(
         &mut self,
         ui: &mut Ui,
-        plots: Vec<Vec<PlotPoint>>, //needs to be Vec<Vec<PlotPoint>>, or could be stored in self
+        plots: &[Vec<PlotPoint>], //needs to be Vec<Vec<PlotPoint>>, or could be stored in self
         graph_dimensions: (usize, usize), //could have enum that describes graph type, and 2d array
-                                    //that describes location of each graph in column/row
+                                  //that describes location of each graph in column/row
     ) {
         struct G {
             line: Vec<PlotPoint>,
@@ -20,11 +27,27 @@ impl App {
         /* Closure for creating plot; for scope reasons it needs to be a closure */
         let create_plot = |ui: &mut Ui, graph: GraphType, plots: Vec<PlotPoint>| {
             let plot_name = format!("{graph}");
-            let curve_name = format!("{graph}_Curve");
-            Plot::new(plot_name).show(ui, |plot_ui| {
-                plot_ui
-                    .line(Line::new(&curve_name, PlotPoints::Borrowed(&plots)).name(&curve_name));
-            });
+            let curve_name = format!("{graph}");
+            let plot_legend = Legend::default()
+                .position(egui_plot::Corner::LeftTop)
+                .title(&plot_name);
+            Plot::new(plot_name)
+                .allow_axis_zoom_drag(false)
+                .allow_boxed_zoom(false)
+                .allow_zoom(false)
+                .allow_drag(false)
+                .cursor_color(Color32::TRANSPARENT)
+                .legend(plot_legend)
+                .show(ui, |plot_ui| {
+                    plot_ui.line(
+                        Line::new(&curve_name, PlotPoints::Borrowed(&plots)).name(&curve_name),
+                    );
+                    let p: PlotPoints<'_> = plots.clone().iter().map(|i| [i.x, i.y]).collect();
+                    let markers = Points::new(&curve_name, p)
+                        .shape(MarkerShape::Circle)
+                        .radius(2.0);
+                    plot_ui.points(markers);
+                });
         };
 
         /* Same deal, but with drawing the row of graphs */

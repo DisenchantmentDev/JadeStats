@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 
 use crate::{
-    data_processor::{Me, Position, RawData, Side},
+    data_processor::{Me, Position, PurchaseEvent, PurchaseHistory, RawData, Side},
     interface::{
         match_data::MatchData,
-        timeline::{ParticipantFrames, Timeline},
+        timeline::{Event, Frame, ParticipantFrames, Timeline},
     },
 };
 
@@ -19,6 +19,7 @@ impl RawData {
             kp: Self::filter_kp(game_data),
             champs: Self::filter_champs(game_data),
             win_loss: Self::find_wl(game_data),
+            purchase_history: Self::filter_purchases(game_tl),
             game_end: game_data.info.game_end_timestamp,
         }
     }
@@ -51,20 +52,59 @@ impl RawData {
         }
     }
 
+    fn filter_purchases(game_tl: &Timeline) -> [(PurchaseHistory, PurchaseHistory); 5] {
+        let mut out: [(PurchaseHistory, PurchaseHistory); 5] = Default::default();
+
+        (0..5).for_each(|f| {
+            out[f] = (
+                Self::gen_player_purchases(game_tl, f),
+                Self::gen_player_purchases(game_tl, f + 5),
+            );
+        });
+        out
+    }
+
+    fn gen_player_purchases(game_tl: &Timeline, p_index: usize) -> PurchaseHistory {
+        let mut out: PurchaseHistory = Default::default();
+
+        for frame in &game_tl.info.frames {
+            for event in &frame.events {
+                if (event.type_field == "ITEM_PURCHASED"
+                    || event.type_field == "ITEM_DESTROYED"
+                    || event.type_field == "ITEM_UNDO")
+                    && event.participant_id.unwrap() == (p_index as i64)
+                {
+                    if event.timestamp == 0 {
+                        continue;
+                    }
+                    out.purchases.push(PurchaseEvent {
+                        item_id: event.item_id,
+                        event_type: event.type_field.clone(),
+                        timestamp: event.timestamp,
+                        pid: event.participant_id,
+                    })
+                }
+            }
+        }
+        out
+    }
+
     fn filter_pids(game: &MatchData) -> [(String, String); 5] {
         let mut out: [(String, String); 5] = Default::default();
-        for i in 0..5 {
+
+        (0..5).for_each(|i| {
             out[i] = (
                 game.info.participants.get(i).unwrap().puuid.clone(),
                 game.info.participants.get(i + 5).unwrap().puuid.clone(),
             );
-        }
-        return out;
+        });
+
+        out
     }
 
     fn filter_champs(game: &MatchData) -> [(String, String); 5] {
         let mut out: [(String, String); 5] = Default::default();
-        for i in 0..5 {
+        (0..5).for_each(|i| {
             out[i] = (
                 game.info.participants.get(i).unwrap().champion_name.clone(),
                 game.info
@@ -74,18 +114,18 @@ impl RawData {
                     .champion_name
                     .clone(),
             );
-        }
-        return out;
+        });
+        out
     }
 
     fn filter_g15(game_tl: &Timeline) -> [(i32, i32); 5] {
+        let frame = game_tl.info.frames[15].participant_frames.clone();
         let mut out: [(i32, i32); 5] = [(0, 0); 5];
         for i in 0..5 {
-            let (p1_gold, p2_gold) =
-                Self::find_gold_in_frame(&game_tl.info.frames[15].participant_frames, i);
+            let (p1_gold, p2_gold) = Self::find_gold_in_frame(&frame, i);
             out[i as usize] = (p1_gold, p2_gold);
         }
-        return out;
+        out
     }
 
     fn filter_csm(game_tl: &Timeline) -> [(f32, f32); 5] {
@@ -137,7 +177,7 @@ impl RawData {
             r_team_kills += participants.get(j).unwrap().kills;
         }
 
-        for i in 0..5 {
+        (0..5).for_each(|i| {
             let p1_kp = ((participants.get(i).unwrap().kills + participants.get(i).unwrap().assists)
                 as f32)
                 / (b_team_kills as f32)
@@ -147,7 +187,8 @@ impl RawData {
                 / (r_team_kills as f32)
                 * 100.0;
             out[i] = (p1_kp, p2_kp);
-        }
+        });
+
         out
     }
 
@@ -161,6 +202,7 @@ impl RawData {
     fn find_gold_in_frame(frame: &ParticipantFrames, p_index: i8) -> (i32, i32) {
         let mut frame_map = HashMap::new();
         let p_index2 = p_index + 5;
+        //somehow find player inventory and prices of each item in inventory
 
         frame_map.insert(0, frame.n1.current_gold);
         frame_map.insert(1, frame.n2.current_gold);
@@ -245,4 +287,3 @@ impl RawData {
         (d1 as f32, d2 as f32)
     }
 }
-

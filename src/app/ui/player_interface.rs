@@ -22,56 +22,36 @@ impl App {
         let raw_username = format!("{}#{:?}", self.username, self.region);
         self.loaded_player = Player::new(raw_username.as_str(), api_key)?;
 
-        //create path here once and the .join() to it
-        let profile_path: PathBuf = [
-            "/",
-            "run",
-            "media",
-            "whale",
-            "Project Storage",
-            "Programming",
-            "JadeStats",
-            "assets",
-            "profiles",
-            format!("{raw_username}.json").as_str(),
-        ]
-        .into_iter()
-        .collect();
+        let root_dir = project_root::get_project_root()?;
 
-        if Self::indexed_players_contains(&raw_username)? {
+        let profile_path: PathBuf = root_dir.join(format!("assets/profiles/{raw_username}.json"));
+
+        if Self::indexed_players_contains(&root_dir, &raw_username)? {
             let player_as_str = fs::read_to_string(profile_path.clone())?;
             self.loaded_player.load_indexed_player(player_as_str)?;
-            self.loaded_player.load_new_games()?;
+            //self.loaded_player.load_new_games()?;
         } else {
-            Self::update_index_file(raw_username.clone())?;
+            Self::update_index_file(&root_dir, raw_username.clone())?;
             File::create(profile_path.clone())?;
             self.loaded_player.load_new_player()?;
         }
 
-        let mut player_file = OpenOptions::new().write(true).open(profile_path.clone())?;
+        let mut player_file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .open(profile_path.clone())?;
         player_file.write_all(serde_json::to_string(&self.loaded_player)?.as_bytes())?;
         Ok(())
     }
 
-    fn indexed_players_contains(player: &String) -> Result<bool, Error> {
-        let index = Self::read_indexed_players()?;
+    fn indexed_players_contains(root: &Path, player: &String) -> Result<bool, Error> {
+        let index = Self::read_indexed_players(root)?;
         Ok(index.contains(player))
     }
 
-    fn read_indexed_players() -> Result<Vec<String>, Error> {
-        let indexed_profile_path: PathBuf = [
-            "/",
-            "run",
-            "media",
-            "whale",
-            "Project Storage",
-            "Programming",
-            "JadeStats",
-            "assets",
-            "profile_index.json",
-        ]
-        .into_iter()
-        .collect();
+    fn read_indexed_players(root: &Path) -> Result<Vec<String>, Error> {
+        let indexed_profile_path = root.join("assets/profile_index.json");
+        //println!("Read indexed players path: {:?}", indexed_profile_path);
         #[derive(Serialize, Deserialize, Debug)]
         struct Temp {
             profiles: Vec<String>,
@@ -91,26 +71,15 @@ impl App {
         Ok(indexes.profiles)
     }
 
-    fn update_index_file(player: String) -> Result<(), Error> {
-        let indexed_profile_path: PathBuf = [
-            "/",
-            "run",
-            "media",
-            "whale",
-            "Project Storage",
-            "Programming",
-            "JadeStats",
-            "assets",
-            "profile_index.json",
-        ]
-        .into_iter()
-        .collect();
+    fn update_index_file(root: &Path, player: String) -> Result<(), Error> {
+        let indexed_profile_path = root.join("assets/profile_index.json");
+        //println!("Update indexed players path: {:?}", indexed_profile_path);
         #[derive(Serialize, Deserialize)]
         struct Temp {
             profiles: Vec<String>,
         }
 
-        let mut indexed = Self::read_indexed_players()?;
+        let mut indexed = Self::read_indexed_players(root)?;
         indexed.push(player);
         //let updated = Temp { profiles: indexed };
         let serialized = serde_json::to_string(&Temp { profiles: indexed })?;

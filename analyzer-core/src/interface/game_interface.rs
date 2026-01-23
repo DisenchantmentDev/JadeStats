@@ -56,6 +56,10 @@ impl Interface {
                 let game_tl = self.request_match_timeline(id)?;
                 let mut raw = RawData::new(&game_data, &game_tl);
                 raw.find_me(puuid);
+                //println!(
+                //    "User Inventory @ 15: {:?}",
+                //    RawData::find_player_inventory(&game_tl, 2)
+                //);
                 out.push(raw);
             }
         }

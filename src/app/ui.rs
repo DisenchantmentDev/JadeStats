@@ -88,7 +88,7 @@ impl eframe::App for App {
 impl App {
     fn ui(&mut self, ctx: &egui::Context) {
         set_style(ctx);
-        top_bar(ctx);
+        self.top_bar(ctx);
         //CentralPanel::default().show(ctx, |vi| vi.heading("JadeStats"));
         SidePanel::left("FileList")
             .default_width(300.0)
@@ -183,6 +183,23 @@ impl App {
             }
         });
     }
+
+    fn top_bar(&mut self, ctx: &Context) {
+        TopBottomPanel::top("menu_bar").show(ctx, |ui| {
+            egui::containers::menu::MenuBar::new().ui(ui, |ui| {
+                ui.menu_button("File", |ui| {
+                    if ui.button("To Home").clicked() {
+                        self.state = State::Home;
+                        self.loaded_player = Player::default();
+                        self.has_loaded = false;
+                    }
+                    if ui.button("Exit").clicked() {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                })
+            })
+        });
+    }
 }
 
 fn set_style(ctx: &Context) {
@@ -198,16 +215,4 @@ fn set_style(ctx: &Context) {
     ]
     .into();
     ctx.set_style(style);
-}
-
-fn top_bar(ctx: &Context) {
-    TopBottomPanel::top("menu_bar").show(ctx, |ui| {
-        egui::containers::menu::MenuBar::new().ui(ui, |ui| {
-            ui.menu_button("File", |ui| {
-                if ui.button("Exit").clicked() {
-                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
-                }
-            })
-        })
-    });
 }

@@ -95,8 +95,9 @@ impl Player {
     }
 
     pub fn load_indexed_player(&mut self, player_as_string: String) -> Result<(), ApiError> {
+        //println!("entered load_indexed_player: {player_as_string}");
         let save: Player = serde_json::from_str(&player_as_string)?;
-        let inter = Interface::new(&self.start_data.api_key);
+        let inter = Interface::new_with_server(&self.start_data.api_key, save.ident.server.clone());
         self.ident = save.ident;
         self.start_data = save.start_data;
         self.games = save.games;

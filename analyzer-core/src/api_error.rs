@@ -1,5 +1,4 @@
-use std::error::Error;
-use std::fmt::{self, Formatter};
+use std::fmt;
 
 #[derive(Debug)]
 pub struct ApiError {

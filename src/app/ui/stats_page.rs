@@ -70,7 +70,7 @@ impl App {
 
             //graph grid
             ui.set_max_width(max_width);
-            self.draw_stat_graph_strip(ui, graphs, self.graph_dimensions);
+            self.draw_stat_graph_strip(ui, &graphs, self.graph_dimensions);
         });
     }
 }

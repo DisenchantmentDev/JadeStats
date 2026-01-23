@@ -8,9 +8,9 @@ pub struct AppError {
 
 #[allow(clippy::allow_attributes, clippy::todo)]
 impl AppError {
-    pub fn new(msg: &str) -> AppError {
+    pub fn new(msg: &str) -> Self {
         Self {
-            details: msg.to_string(),
+            details: msg.to_owned(),
         }
     }
 }

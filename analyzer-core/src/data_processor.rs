@@ -26,6 +26,7 @@ pub struct RawData {
     pub kp: [(f32, f32); 5],
     pub champs: [(String, String); 5],
     pub win_loss: (bool, bool),
+    pub purchase_history: [(PurchaseHistory, PurchaseHistory); 5],
     pub game_end: i64,
 }
 
@@ -35,6 +36,20 @@ pub struct Me {
     pub champ: String,
     pub pos: Position,
 }
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PurchaseHistory {
+    pub purchases: Vec<PurchaseEvent>,
+}
+
+#[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
+pub struct PurchaseEvent {
+    pub event_type: String,
+    pub item_id: Option<i64>,
+    pub timestamp: i64,
+    pub pid: Option<i64>,
+}
+
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub enum Side {
     #[default]
