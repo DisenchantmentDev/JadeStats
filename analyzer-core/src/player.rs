@@ -77,7 +77,7 @@ impl Player {
             .get_game_ids(&time.to_string(), &self.start_data.puuid)?;
         //TODO: check if we have fewer than 15 games, then check again with backed up timestamp
         let mut count = 0;
-        while game_ids.len() < 15 {
+        while game_ids.len() < 10 {
             time -= 86400;
             if count > 14 {
                 return Err(ApiError::new("Player does not have enough games"));

@@ -22,10 +22,12 @@ impl Interface {
         //    "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?start={}&api_key={}",
         //    url_server, puuid, start_timestamp, self.api_key
         //);
+        let q_type = String::from("ranked");
+        let q_val = String::from("420"); /* for later parameterization */
         let resp = reqwest::blocking::get(
             format!(
-                "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?startTime={}&api_key={}",
-                url_server, puuid, start_timestamp, self.api_key)
+                "https://{}.api.riotgames.com/lol/match/v5/matches/by-puuid/{}/ids?queue={}&type={}&startTime={}&api_key={}",
+                url_server, puuid, q_val, q_type, start_timestamp, self.api_key)
             ).unwrap().text().unwrap();
         println!("{}", resp);
         let mut deserializer = Deserializer::from_str(&resp);

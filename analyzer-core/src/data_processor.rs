@@ -1,6 +1,12 @@
+use project_root;
 use serde_derive::{Deserialize, Serialize};
+use serde_json;
+use std::fs;
 
 pub mod filter;
+pub mod items;
+
+use items::{Item, Items};
 
 #[derive(Default, Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct GraphData {
@@ -153,9 +159,102 @@ impl Games {
 
     fn calc_gd(game: &RawData, side: &Side, p_index: &usize) -> i32 {
         match side {
-            Side::BLUE => game.g15[*p_index].0 - game.g15[*p_index].1,
-            Side::RED => game.g15[*p_index].1 - game.g15[*p_index].0,
+            Side::BLUE => {
+                (game.g15[*p_index].0
+                    + Self::inventory_item_value(&game.purchase_history[*p_index].0) as i32)
+                    - (game.g15[*p_index].1
+                        + Self::inventory_item_value(&game.purchase_history[*p_index].1) as i32)
+            }
+            Side::RED => {
+                (game.g15[*p_index].1
+                    + Self::inventory_item_value(&game.purchase_history[*p_index].0) as i32)
+                    - (game.g15[*p_index].0
+                        + Self::inventory_item_value(&game.purchase_history[*p_index].1) as i32)
+            }
         }
+    }
+
+    fn inventory_item_value(history: &PurchaseHistory) -> i64 {
+        let items_list = Items::new();
+        let mut player_inv: Vec<Item> = Vec::new();
+        let mut out: i64 = 0;
+        let mut action_stack = Vec::<PurchaseEvent>::new();
+
+        for p in &history.purchases {
+            if (p.timestamp / 60000) > 15 {
+                continue;
+            }
+            if let Some(top_iid) = p.item_id {
+                let temp = top_iid.to_string();
+                let item = match items_list.get(temp) {
+                    Some(i) => i.clone(),
+                    None => {
+                        println!("Item accessed does not exist, skipping item...");
+                        continue;
+                    }
+                };
+
+                let _: () = match p.event_type.as_str() {
+                    "ITEM_PURCHASED" => {
+                        //println!("Added item '{}' to player inventory", item.get_item_name());
+                        player_inv.push(item.clone());
+                        action_stack.push(p.clone());
+                    }
+                    "ITEM_DESTROYED" => {
+                        if let Some(iid) = p.item_id
+                            && iid.to_string().len() < 5
+                            && items_list.get_unchecked(iid.to_string()).transforms()
+                        {
+                            //println!("Item {} has (probably) upgraded!", iid);
+                        } else {
+                            action_stack.push(p.clone());
+                        }
+                    }
+                    "ITEM_SOLD" => {
+                        if let Some(iid) = p.item_id
+                            && let Some(index) = player_inv
+                                .iter()
+                                .position(|x| x == items_list.get_unchecked(iid.to_string()))
+                        {
+                            player_inv.remove(index);
+                            action_stack.push(p.clone());
+                        }
+                    }
+                    "ITEM_UNDO" => {
+                        if let Some(last_action) = action_stack.pop()
+                            && let Some(iid) = last_action.item_id
+                        {
+                            if last_action.event_type == "ITEM_DESTROYED" {
+                                println!("Undo Item Purchase");
+                                player_inv.push(items_list.get_unchecked(iid.to_string()).clone());
+                                //remove item from inv, pop actions until we are not destroying something relevant
+                                while let Some(check) = action_stack.pop()
+                                    && check.event_type != "ITEM_PURCHASED"
+                                    && let Some(check_iid) = check.item_id
+                                    && let Some(index) = player_inv.iter().position(|x| {
+                                        x == items_list.get_unchecked(check_iid.to_string())
+                                    })
+                                {
+                                    player_inv.remove(index);
+                                    println!("added {} as part of undo", iid);
+                                }
+                            } else if last_action.event_type == "ITEM_SOLD"
+                                && let Some(iid) = last_action.item_id
+                            {
+                                player_inv.push(items_list.get_unchecked(iid.to_string()).clone());
+                            }
+                        }
+                    }
+                    &_ => {}
+                };
+            }
+        }
+
+        for i in player_inv {
+            out += i.get_item_value();
+        }
+
+        out
     }
 
     fn find_csm(game: &RawData, side: &Side, p_index: &usize) -> f32 {

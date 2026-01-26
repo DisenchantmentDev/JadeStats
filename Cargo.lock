@@ -147,6 +147,7 @@ version = "0.2.0"
 dependencies = [
  "chrono",
  "owo-colors",
+ "project-root",
  "reqwest",
  "serde",
  "serde_derive",

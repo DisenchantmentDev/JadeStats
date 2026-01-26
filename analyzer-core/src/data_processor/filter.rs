@@ -57,8 +57,8 @@ impl RawData {
 
         (0..5).for_each(|f| {
             out[f] = (
-                Self::gen_player_purchases(game_tl, f),
-                Self::gen_player_purchases(game_tl, f + 5),
+                Self::gen_player_purchases(game_tl, f + 1),
+                Self::gen_player_purchases(game_tl, f + 6),
             );
         });
         out
@@ -71,7 +71,8 @@ impl RawData {
             for event in &frame.events {
                 if (event.type_field == "ITEM_PURCHASED"
                     || event.type_field == "ITEM_DESTROYED"
-                    || event.type_field == "ITEM_UNDO")
+                    || event.type_field == "ITEM_UNDO"
+                    || event.type_field == "ITEM_SOLD")
                     && event.participant_id.unwrap() == (p_index as i64)
                 {
                     if event.timestamp == 0 {
