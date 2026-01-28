@@ -85,7 +85,7 @@ impl RawData {
                             });
                         }
                         "ITEM_DESTROYED" => {
-                            out.events.push(ItemEvent::PURCHASE {
+                            out.events.push(ItemEvent::DESTROY {
                                 item_id: event.item_id.unwrap(),
                                 timestamp: event.timestamp,
                                 pid: event.participant_id.unwrap(),
@@ -147,10 +147,10 @@ impl RawData {
     fn filter_g15(game_tl: &Timeline) -> [(i32, i32); 5] {
         let frame = game_tl.info.frames[15].participant_frames.clone();
         let mut out: [(i32, i32); 5] = [(0, 0); 5];
-        for i in 0..5 {
+        (0..5).for_each(|i| {
             let (p1_gold, p2_gold) = Self::find_gold_in_frame(&frame, i);
             out[i as usize] = (p1_gold, p2_gold);
-        }
+        });
         out
     }
 
@@ -228,7 +228,6 @@ impl RawData {
     fn find_gold_in_frame(frame: &ParticipantFrames, p_index: i8) -> (i32, i32) {
         let mut frame_map = HashMap::new();
         let p_index2 = p_index + 5;
-        //somehow find player inventory and prices of each item in inventory
 
         frame_map.insert(0, frame.n1.current_gold);
         frame_map.insert(1, frame.n2.current_gold);

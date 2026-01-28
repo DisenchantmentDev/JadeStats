@@ -8,7 +8,25 @@ let base_path = PathBuf::new("run/media/whale/Project Storage/JadeStats); let pr
 
 
 
+6647 - 5983 = 664 (gd@15)
+Core's Result: 519
+Thinks Ody's inventory is worth 13310
+Ody Items @ 15: Dark Seal, BFT, Liandrie, Ionians, Doran's Ring
+    Dark Seal: 350
+    Ionians: 900
+    BFT: 2800
+    Liandrie's: 3000
+    Dorans: 400
+    Total: 7450
 
-Target gd@15 for game 8: -1254
-W/ total_gold: -3038.0
-W/ current_cold: -337.0
+
+Boots are not included due to midlane quest destroying them but the analyzer not catching that
+W/o boots, we're getting -41
+
+
+
+
+
+Todo:
+    Empty or invalid entry string; error handling for that
+

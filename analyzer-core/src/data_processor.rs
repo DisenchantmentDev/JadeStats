@@ -247,12 +247,15 @@ impl Games {
         let items_list = Items::new();
         let mut player_inv: Vec<Item> = Vec::new();
         let mut out: i64 = 0;
-        //history.sort();
+        let mut sorted_history: ItemHistory = history.clone();
+        sorted_history.sort();
 
-        for p in &history.events {
+        for p in &sorted_history.events {
             if !Self::check_valid_event(p, &items_list) {
                 continue;
             }
+
+            println!("Action type: {:?}", p);
 
             match p {
                 ItemEvent::PURCHASE {
@@ -267,7 +270,7 @@ impl Games {
                 } => {
                     if let Some(index) = player_inv
                         .iter()
-                        .position(|x| x == items_list.get_unchecked(item_id.to_string()))
+                        .position(|x| x.eq(items_list.get_unchecked(item_id.to_string())))
                     {
                         player_inv.remove(index);
                     }
@@ -277,10 +280,10 @@ impl Games {
                     timestamp: _timestamp,
                     pid: _pid,
                 } => {
-                    if !items_list.get_unchecked(item_id.to_string()).transforms()
+                    if items_list.get_unchecked(item_id.to_string()).is_component()
                         && let Some(index) = player_inv
                             .iter()
-                            .position(|x| x == items_list.get_unchecked(item_id.to_string()))
+                            .position(|x| x.eq(items_list.get_unchecked(item_id.to_string())))
                     {
                         player_inv.remove(index);
                     }
@@ -295,9 +298,10 @@ impl Games {
                     // if before was something and after is 0, we undid a buy
                     // iff after is something and before was 0, we undid a sell
                     if *after_id == 0 {
-                        if let Some(index) = player_inv.iter().position(|x| {
-                            x == items_list.get_unchecked(before_id.to_string().clone())
-                        }) {
+                        if let Some(index) = player_inv
+                            .iter()
+                            .position(|x| x.eq(items_list.get_unchecked(before_id.to_string())))
+                        {
                             player_inv.remove(index);
                         }
                     } else if *before_id == 0 {
@@ -308,13 +312,23 @@ impl Games {
                 }
                 ItemEvent::UNKNOWN => {}
             };
+            //print!("Player inventory after event: ");
+            //for i in player_inv.clone() {
+            //    print!("{}", i.get_item_name());
+            //}
+            //println!();
         }
+        let mut debug_string = Vec::<String>::new();
 
         for i in player_inv {
+            debug_string.push(i.get_item_name());
             out += i.get_item_value();
         }
 
-        println!("Total gold value of player items: {out}");
+        println!(
+            "Player inventory: {:?}\nTotal gold value of player items: {}",
+            debug_string, out
+        );
 
         out
     }

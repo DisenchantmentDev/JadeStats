@@ -20,6 +20,7 @@ pub struct Item {
     total_price: i64,
     special_recipe: Option<String>,
     transforms: bool,
+    //    boots: bool,
 }
 
 impl Item {
@@ -54,6 +55,13 @@ impl Item {
                 .expect("Could not get item description")
                 .to_string()
                 .contains("<br>Transforms into "),
+            //boots: data
+            //    .get("tags")
+            //    .and_then(|val| val.as_array())
+            //    .map(|arr| {
+            //        arr.iter().position(|x| x == "boots");
+            //    })
+            //    .is_some(),
         }
     }
 
@@ -75,6 +83,19 @@ impl Item {
 
     pub fn transforms(&self) -> bool {
         self.transforms
+    }
+
+    pub fn is_boot(&self) -> bool {
+        self.name.contains("Ionian Boots of Lucidity")
+            || self.name.contains("Berserker's Greaves")
+            || self.name.contains("Boots of Swiftness")
+            || self.name.contains("Mercury's Treads")
+            || self.name.contains("Plated Steelcaps")
+            || self.name.contains("Sorcerer's Shoes")
+    }
+
+    pub fn is_component(&self) -> bool {
+        !self.is_boot() && !self.transforms
     }
 }
 
@@ -107,7 +128,11 @@ impl Items {
             .expect("Data must be an object");
 
         for (id, value) in items {
-            if id.len() > 4 {
+            if id.len() > 4
+                || id == &String::from("2002")
+                || id == &String::from("2001")
+                || id == &String::from("1201")
+            {
                 continue;
             }
             out.insert(id.clone(), Item::new(value));
