@@ -10,7 +10,6 @@ use egui::TextStyle;
 use egui::TopBottomPanel;
 use egui::Ui;
 use egui::{Color32, FontFamily, FontId, RichText};
-use egui_extras::{Size, Strip, StripBuilder};
 
 use crate::app::app_error::AppError;
 pub mod player_interface;
@@ -28,6 +27,7 @@ pub struct App {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
+#[allow(dead_code, clippy::allow_attributes)]
 enum State {
     #[default]
     Home,
@@ -37,6 +37,7 @@ enum State {
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
+#[allow(clippy::upper_case_acronyms, clippy::allow_attributes)]
 enum GraphType {
     #[default]
     GD15,
@@ -46,6 +47,7 @@ enum GraphType {
 }
 
 #[derive(Debug, Default, PartialEq)]
+#[allow(clippy::upper_case_acronyms, clippy::allow_attributes)]
 enum Regions {
     #[default]
     NA,
@@ -56,7 +58,7 @@ enum Regions {
 }
 
 impl fmt::Display for GraphType {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             Self::GD15 => write!(f, "GD@15"),
             Self::CSM => write!(f, "CS/M"),
@@ -97,7 +99,7 @@ impl App {
             .resizable(true)
             .show(ctx, |ui| {
                 ScrollArea::vertical().show(ui, |ui| {
-                    let available_width = ui.available_width();
+                    let _available_width = ui.available_width();
                     ui.heading("Profiles");
                     ui.separator();
                 })
@@ -136,7 +138,7 @@ impl App {
                 //self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
             }
             State::Profile => {
-                let temp = 100;
+                let _temp = 100;
             }
             State::Loading => {}
         });
