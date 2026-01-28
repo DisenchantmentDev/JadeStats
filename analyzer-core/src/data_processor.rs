@@ -61,6 +61,12 @@ pub struct ItemHistory {
     pub events: Vec<ItemEvent>,
 }
 
+impl ItemHistory {
+    pub fn sort(&mut self) {
+        self.events.sort_by_key(|a| a.get_timestamp());
+    }
+}
+
 #[derive(Debug, Default, Clone, Serialize, Deserialize, PartialEq)]
 pub enum ItemEvent {
     PURCHASE {
@@ -87,6 +93,36 @@ pub enum ItemEvent {
     },
     #[default]
     UNKNOWN,
+}
+
+impl ItemEvent {
+    pub fn get_timestamp(&self) -> i64 {
+        match &self {
+            ItemEvent::PURCHASE {
+                item_id: _item_id,
+                timestamp,
+                pid: _pid,
+            }
+            | ItemEvent::SELL {
+                item_id: _item_id,
+                timestamp,
+                pid: _pid,
+            }
+            | ItemEvent::DESTROY {
+                item_id: _item_id,
+                timestamp,
+                pid: _pid,
+            } => *timestamp,
+            ItemEvent::UNDO {
+                after_id: _after_id,
+                before_id: _before_id,
+                gold_gain: _gold_gain,
+                timestamp,
+                pid: _pid,
+            } => *timestamp,
+            ItemEvent::UNKNOWN => 0,
+        }
+    }
 }
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize, PartialEq)]
@@ -211,6 +247,7 @@ impl Games {
         let items_list = Items::new();
         let mut player_inv: Vec<Item> = Vec::new();
         let mut out: i64 = 0;
+        //history.sort();
 
         for p in &history.events {
             if !Self::check_valid_event(p, &items_list) {
@@ -282,6 +319,7 @@ impl Games {
         out
     }
 
+    /* Checks if the event in the list is within the first 15 minutes*/
     fn check_valid_event(event: &ItemEvent, items: &Items) -> bool {
         match event {
             ItemEvent::PURCHASE {
@@ -300,7 +338,7 @@ impl Games {
                 pid: _pid,
             } => {
                 if items.get(item_id.to_string()).is_some() {
-                    return *timestamp <= 900000;
+                    return timestamp <= &(900000);
                 }
                 false
             }
@@ -311,14 +349,10 @@ impl Games {
                 timestamp,
                 pid: _pid,
             } => {
-                if *after_id == 0
-                    && let Some(_) = items.get(before_id.to_string())
+                if *after_id == 0 && items.get(before_id.to_string()).is_some()
+                    || *before_id == 0 && items.get(after_id.to_string()).is_some()
                 {
-                    return *timestamp <= 900000;
-                } else if *before_id == 0
-                    && let Some(_) = items.get(after_id.to_string())
-                {
-                    return *timestamp <= 900000;
+                    return timestamp <= &(900000);
                 }
                 false
             }

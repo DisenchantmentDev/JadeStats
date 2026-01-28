@@ -78,6 +78,8 @@ impl Item {
     }
 }
 
+/* Generates a hash table of items generated from data dragon items.json
+* Json file should be located in ./assets */
 impl Items {
     pub fn new() -> Self {
         let temp = Self::filter_sr_items().unwrap_or_default();
@@ -93,6 +95,8 @@ impl Items {
         self.items.get(&key).expect("Failed to get item id, loser")
     }
 
+    /* Generates the HashTable from DataDragon, but only populates with the items buyable on
+     * summoner's rift */
     fn filter_sr_items() -> Result<HashMap<String, Item>, ApiError> {
         let mut out: HashMap<String, Item> = HashMap::new();
         let path = project_root::get_project_root()?.join("assets/items.json");

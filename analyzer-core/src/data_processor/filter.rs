@@ -54,6 +54,7 @@ impl RawData {
         }
     }
 
+    /* Selects the item purchase history for target player and their lane opponent */
     fn filter_purchases(game_tl: &Timeline) -> [(ItemHistory, ItemHistory); 5] {
         let mut out: [(ItemHistory, ItemHistory); 5] = Default::default();
 
@@ -66,8 +67,8 @@ impl RawData {
         out
     }
 
+    /* Generates a history of item-related events for a given player */
     fn gen_player_purchases(game_tl: &Timeline, p_index: usize) -> ItemHistory {
-        //let mut out2: PurchaseHistory = Default::default();
         let mut out: ItemHistory = Default::default();
 
         for frame in &game_tl.info.frames {
@@ -75,51 +76,40 @@ impl RawData {
                 if let Some(pid) = event.participant_id
                     && pid == (p_index as i64)
                 {
-                    if event.type_field.as_str() == "ITEM_PURCHASED" {
-                        out.events.push(ItemEvent::PURCHASE {
-                            item_id: event.item_id.unwrap(),
-                            timestamp: event.timestamp,
-                            pid: event.participant_id.unwrap(),
-                        });
-                    } else if event.type_field == "ITEM_DESTROYED" {
-                        out.events.push(ItemEvent::DESTROY {
-                            item_id: event.item_id.unwrap(),
-                            timestamp: event.timestamp,
-                            pid: event.participant_id.unwrap(),
-                        });
-                    } else if event.type_field == "ITEM_SOLD" {
-                        out.events.push(ItemEvent::SELL {
-                            item_id: event.item_id.unwrap(),
-                            timestamp: event.timestamp,
-                            pid: event.participant_id.unwrap(),
-                        });
-                    } else if event.type_field == "ITEM_UNDO" {
-                        out.events.push(ItemEvent::UNDO {
-                            after_id: event.after_id.unwrap(),
-                            before_id: event.before_id.unwrap(),
-                            gold_gain: event.gold_gain.unwrap(),
-                            timestamp: event.timestamp,
-                            pid: event.participant_id.unwrap(),
-                        });
-                    }
+                    let _: () = match event.type_field.as_str() {
+                        "ITEM_PURCHASED" => {
+                            out.events.push(ItemEvent::PURCHASE {
+                                item_id: event.item_id.unwrap(),
+                                timestamp: event.timestamp,
+                                pid: event.participant_id.unwrap(),
+                            });
+                        }
+                        "ITEM_DESTROYED" => {
+                            out.events.push(ItemEvent::PURCHASE {
+                                item_id: event.item_id.unwrap(),
+                                timestamp: event.timestamp,
+                                pid: event.participant_id.unwrap(),
+                            });
+                        }
+                        "ITEM_SOLD" => {
+                            out.events.push(ItemEvent::SELL {
+                                item_id: event.item_id.unwrap(),
+                                timestamp: event.timestamp,
+                                pid: event.participant_id.unwrap(),
+                            });
+                        }
+                        "ITEM_UNDO" => {
+                            out.events.push(ItemEvent::UNDO {
+                                after_id: event.after_id.unwrap(),
+                                before_id: event.before_id.unwrap(),
+                                gold_gain: event.gold_gain.unwrap(),
+                                timestamp: event.timestamp,
+                                pid: event.participant_id.unwrap(),
+                            });
+                        }
+                        &_ => {}
+                    };
                 }
-
-                //if (event.type_field == "ITEM_PURCHASED"
-                //    || event.type_field == "ITEM_DESTROYED"
-                //    || event.type_field == "ITEM_UNDO"
-                //    || event.type_field == "ITEM_SOLD")
-                //    && event.participant_id.unwrap() == (p_index as i64)
-                //{
-                //    if event.timestamp == 0 {
-                //        continue;
-                //    }
-                //    out2.purchases.push(PurchaseEvent {
-                //        item_id: event.item_id,
-                //        event_type: event.type_field.clone(),
-                //        timestamp: event.timestamp,
-                //        pid: event.participant_id,
-                //    })
-                //}
             }
         }
         out
