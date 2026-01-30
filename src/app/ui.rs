@@ -1,4 +1,6 @@
 use std::fmt;
+use std::path::PathBuf;
+use std::sync::{Arc, Mutex};
 
 use analyzer_core::player::Player;
 use eframe::egui::CentralPanel;
@@ -12,6 +14,7 @@ use egui::Ui;
 use egui::{Color32, FontFamily, FontId, RichText};
 
 use crate::app::app_error::AppError;
+pub mod loading;
 pub mod player_interface;
 pub mod stats_display;
 pub mod stats_page;
@@ -23,7 +26,28 @@ pub struct App {
     graph_dimensions: (usize, usize), //columns / rows
     has_loaded: bool,
     loaded_player: Player,
+    player: Arc<Mutex<LoadingState<Player>>>,
+    loading_started: bool,
+    root_dir: PathBuf,
     err: Option<AppError>, // Error field that tracks if there is an error thrown by player interface
+}
+
+pub enum LoadingState<T> {
+    Dormant,
+    Loading,
+    Loaded(T),
+    Error(AppError),
+}
+
+pub struct SharedPlayer {
+    pub state: LoadingState<Player>,
+}
+
+#[derive(Clone)]
+pub struct PlayerLoadCtx {
+    pub username: String,
+    pub region: Regions,
+    pub root_dir: PathBuf,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
@@ -46,7 +70,7 @@ enum GraphType {
     KP,
 }
 
-#[derive(Debug, Default, PartialEq)]
+#[derive(Debug, Default, PartialEq, Clone)]
 #[allow(clippy::upper_case_acronyms, clippy::allow_attributes)]
 enum Regions {
     #[default]
@@ -76,6 +100,9 @@ impl Default for App {
             graph_dimensions: (2, 2),
             has_loaded: false,
             loaded_player: Player::default(),
+            player: Arc::new(Mutex::new(LoadingState::Dormant)),
+            loading_started: false,
+            root_dir: project_root::get_project_root().unwrap_or_default(),
             err: None,
         }
     }
@@ -83,6 +110,7 @@ impl Default for App {
 
 impl eframe::App for App {
     fn update(&mut self, ctx: &eframe::egui::Context, _frame: &mut eframe::Frame) {
+        self.start_loading();
         self.ui(ctx);
     }
 }
@@ -106,6 +134,7 @@ impl App {
             });
 
         self.draw_central_panel(ctx);
+        ctx.request_repaint();
 
         //Window::new("TestWindow").show(ctx, |ui| {
         //    ui.label("Test Window");
@@ -177,11 +206,15 @@ impl App {
                     });
 
                 if input_box.lost_focus() && ui.input(|i| i.key_pressed(egui::Key::Enter)) {
-                    self.state = State::Stats;
+                    self.loading_started = false;
+                    self.state = State::Loading;
+                    //self.state = State::Stats;
                 }
             });
             if ui.button("Go!").clicked() {
-                self.state = State::Stats;
+                self.loading_started = false;
+                self.state = State::Loading;
+                //self.state = State::Stats;
             }
         });
     }
@@ -192,8 +225,8 @@ impl App {
                 ui.menu_button("File", |ui| {
                     if ui.button("To Home").clicked() {
                         self.state = State::Home;
-                        self.loaded_player = Player::default();
-                        self.has_loaded = false;
+                        //self.has_loaded = false;
+                        self.loading_started = false;
                     }
                     if ui.button("Exit").clicked() {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
