@@ -6,6 +6,7 @@ use crate::ui::App;
 use crate::ui::LoadingState;
 use crate::ui::PlayerLoadCtx;
 use crate::ui::State;
+use egui_alignments::{center_horizontal_wrapped, center_vertical};
 
 #[allow(clippy::allow_attributes, clippy::missing_errors_doc)]
 impl App {
@@ -38,10 +39,16 @@ impl App {
         let guard = self.player.lock().expect("Failed mutex guard check");
         match &*guard {
             LoadingState::Dormant | LoadingState::Loading => {
-                ui.vertical_centered_justified(|ui| {
-                    ui.heading("Loading...");
-                    ui.spinner();
+                center_vertical(ui, |ui| {
+                    center_horizontal_wrapped(ui, |ui| {
+                        ui.heading("Loading...");
+                        ui.spinner();
+                    });
                 });
+                //ui.vertical_centered_justified(|ui| {
+                //    ui.heading("Loading...");
+                //    ui.spinner();
+                //});
             }
             LoadingState::Loaded(player) => {
                 self.loaded_player = player.clone();

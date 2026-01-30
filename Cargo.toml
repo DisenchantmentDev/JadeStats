@@ -26,6 +26,8 @@ egui_plot = {version = "0.34.0"}
 
 egui_extras = "0.33.3"
 
+egui_alignments = "0.3.7"
+
 # You only need serde if you want app persistence:
 serde = { version = "1.0.219", features = ["derive"] }
 

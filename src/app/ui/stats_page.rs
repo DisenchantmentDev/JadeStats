@@ -42,21 +42,6 @@ impl App {
             .map(|(i, v)| PlotPoint::new(i as f64, v as f64))
             .collect();
 
-        //let sin: Vec<PlotPoint> = (0..1000)
-        //    .map(|i| {
-        //        let x = i as f64 * 0.01;
-        //        PlotPoint::new(x, x.sin())
-        //    })
-        //    .collect();
-
-        //let cosin: Vec<PlotPoint> = (0..1000)
-        //    .map(|i| {
-        //        let x = i as f64 * 0.01;
-        //        PlotPoint::new(x, x.cos())
-        //    })
-        //    .collect();
-
-        //let graphs: Vec<Vec<PlotPoint>> = vec![g_gd15, g_csm, g_dpm, g_kp];
         let graphs: Vec<Vec<PlotPoint>> = vec![g_gd15, g_csm, g_dpm, g_kp];
 
         ui.vertical_centered_justified(|ui| {
@@ -64,7 +49,7 @@ impl App {
             let max_width = ui.available_width();
             ui.set_max_width(200.0);
             ui.label(format!(
-                "Current user: {} ({:?})",
+                "Current user:\n{} ({:?})",
                 self.username, self.region
             ));
 
