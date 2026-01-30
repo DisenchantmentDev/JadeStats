@@ -1,6 +1,5 @@
-use analyzer_core::player;
 use egui::Ui;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 
 use crate::app::app_error::AppError;
 use crate::ui::App;
@@ -8,6 +7,7 @@ use crate::ui::LoadingState;
 use crate::ui::PlayerLoadCtx;
 use crate::ui::State;
 
+#[allow(clippy::allow_attributes, clippy::missing_errors_doc)]
 impl App {
     pub fn start_loading(&mut self) -> Result<(), AppError> {
         if self.state == State::Loading && !self.loading_started {
@@ -38,8 +38,10 @@ impl App {
         let guard = self.player.lock().expect("Failed mutex guard check");
         match &*guard {
             LoadingState::Dormant | LoadingState::Loading => {
-                ui.heading("Loading...");
-                ui.spinner();
+                ui.vertical_centered_justified(|ui| {
+                    ui.heading("Loading...");
+                    ui.spinner();
+                });
             }
             LoadingState::Loaded(player) => {
                 self.loaded_player = player.clone();
