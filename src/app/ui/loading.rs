@@ -30,25 +30,26 @@ impl App {
                     Err(e) => LoadingState::Error(e),
                 };
             });
-
-            //std::thread::spawn(move || {
-            //    {
-            //        let mut guard = loading_state.lock().unwrap();
-            //        *guard = super::LoadingState::Loading;
-            //    }
-
-            //    let result = self.load_player();
-
-            //    let mut guard = loading_state.lock().unwrap();
-
-            //    *guard = match result {
-            //        Ok(player) => LoadingState::Loaded(player),
-            //        Err(e) => LoadingState::Error(e),
-            //    };
-            //});
         }
         Ok(())
     }
 
-    pub fn display_loading(&mut self, ui: &mut Ui) {}
+    pub fn display_loading(&mut self, ui: &mut Ui) {
+        let guard = self.player.lock().expect("Failed mutex guard check");
+        match &*guard {
+            LoadingState::Dormant | LoadingState::Loading => {
+                ui.heading("Loading...");
+                ui.spinner();
+            }
+            LoadingState::Loaded(player) => {
+                self.loaded_player = player.clone();
+                self.has_loaded = true;
+                self.state = State::Stats;
+            }
+            LoadingState::Error(app_error) => {
+                self.err = Some(app_error.clone());
+                self.state = State::Home;
+            }
+        }
+    }
 }

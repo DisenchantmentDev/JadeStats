@@ -149,19 +149,10 @@ impl App {
             }
 
             State::Stats => {
-                if !self.has_loaded {
-                    match self.load_player() {
-                        Ok(_) => {
-                            self.has_loaded = true;
-                            self.draw_stats(ui);
-                        }
-                        Err(e) => {
-                            self.state = State::Home;
-                            self.err = Some(e);
-                        }
-                    }
-                } else {
+                if self.err.is_none() {
                     self.draw_stats(ui);
+                } else {
+                    self.state = State::Home;
                 }
                 //graph grid
                 //self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
@@ -169,7 +160,9 @@ impl App {
             State::Profile => {
                 let _temp = 100;
             }
-            State::Loading => {}
+            State::Loading => {
+                self.display_loading(ui);
+            }
         });
     }
 

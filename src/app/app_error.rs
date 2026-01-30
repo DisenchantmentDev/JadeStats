@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt::{self, Formatter};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct AppError {
     pub details: String,
 }
