@@ -16,21 +16,22 @@ impl PlayerLoadCtx {
     pub fn load_player(&mut self) -> Result<Player, AppError> {
         let api_key = Self::get_api_key();
         let raw_username = format!("{}#{:?}", self.username, self.region);
-        let mut loaded_player = Player::new(raw_username.as_str(), api_key)?;
-
         let profile_path: PathBuf = self
             .root_dir
             .join(format!("assets/profiles/{raw_username}.json"));
 
-        if Self::indexed_players_contains(&self.root_dir, &raw_username)? {
+        let mut loaded_player = Player::default();
+        if self.indexed_players.contains(&raw_username) {
+            loaded_player.set_api(api_key);
             let player_as_str = fs::read_to_string(profile_path.clone())?;
             loaded_player.load_indexed_player(player_as_str)?;
-            //self.loaded_player.load_new_games()?;
         } else {
+            loaded_player = Player::new(raw_username.as_str(), api_key)?;
             Self::update_index_file(&self.root_dir, raw_username.clone())?;
             File::create(profile_path.clone())?;
             loaded_player.load_new_player()?;
         }
+        //let mut loaded_player = Player::new(raw_username.as_str(), api_key)?;
 
         let mut player_file = OpenOptions::new()
             .write(true)
@@ -45,12 +46,7 @@ impl PlayerLoadCtx {
         std::env::var("API_TOKEN").expect("Could not find environment variables")
     }
 
-    fn indexed_players_contains(root: &Path, player: &String) -> Result<bool, Error> {
-        let index = Self::read_indexed_players(root)?;
-        Ok(index.contains(player))
-    }
-
-    fn read_indexed_players(root: &Path) -> Result<Vec<String>, Error> {
+    pub fn read_indexed_players(root: &Path) -> Result<Vec<String>, Error> {
         let indexed_profile_path = root.join("assets/profile_index.json");
         //println!("Read indexed players path: {:?}", indexed_profile_path);
         #[derive(Serialize, Deserialize, Debug)]

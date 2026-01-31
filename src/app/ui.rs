@@ -15,6 +15,7 @@ use crate::app::app_error::AppError;
 pub mod home;
 pub mod loading;
 pub mod player_interface;
+pub mod profiles_list;
 pub mod stats_display;
 pub mod stats_page;
 
@@ -24,6 +25,7 @@ pub struct App {
     state: State,
     graph_dimensions: (usize, usize), //columns / rows
     has_loaded: bool,
+    indexed_players: Vec<String>,
     loaded_player: Player,
     player: Arc<Mutex<LoadingState<Player>>>,
     loading_started: bool,
@@ -47,6 +49,7 @@ pub struct PlayerLoadCtx {
     pub username: String,
     pub region: Regions,
     pub root_dir: PathBuf,
+    pub indexed_players: Vec<String>,
 }
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
@@ -93,16 +96,19 @@ impl fmt::Display for GraphType {
 }
 impl Default for App {
     fn default() -> Self {
+        let dir = project_root::get_project_root().unwrap_or_default();
         Self {
             username: String::default(),
             region: Regions::NA,
             state: State::Home,
             graph_dimensions: (2, 2),
             has_loaded: false,
+            indexed_players: PlayerLoadCtx::read_indexed_players(&dir)
+                .expect("Could not read indexed players on initialization"),
             loaded_player: Player::default(),
             player: Arc::new(Mutex::new(LoadingState::Dormant)),
             loading_started: false,
-            root_dir: project_root::get_project_root().unwrap_or_default(),
+            root_dir: dir,
             err: None,
         }
     }
@@ -120,19 +126,7 @@ impl App {
         set_style(ctx);
         self.top_bar(ctx);
         //CentralPanel::default().show(ctx, |vi| vi.heading("JadeStats"));
-        SidePanel::left("FileList")
-            .default_width(300.0)
-            .min_width(100.0)
-            .max_width(500.0)
-            .resizable(true)
-            .show(ctx, |ui| {
-                ScrollArea::vertical().show(ui, |ui| {
-                    let _available_width = ui.available_width();
-                    ui.heading("Profiles");
-                    ui.separator();
-                })
-            });
-
+        self.draw_side_panel(ctx);
         self.draw_central_panel(ctx);
         ctx.request_repaint();
 

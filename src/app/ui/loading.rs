@@ -18,6 +18,7 @@ impl App {
                 username: self.username.clone(),
                 region: self.region.clone(),
                 root_dir: self.root_dir.clone(),
+                indexed_players: self.indexed_players.clone(),
             };
 
             let loading_player = Arc::clone(&self.player);
