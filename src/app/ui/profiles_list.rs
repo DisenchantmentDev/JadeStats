@@ -1,4 +1,4 @@
-use crate::ui::{App, AppError, Regions, State};
+use crate::ui::{App, AppError, PlayerLoadCtx, Regions, State};
 use analyzer_core::player::Player;
 use egui::{Context, ScrollArea, SidePanel};
 use std::fs;
@@ -28,25 +28,28 @@ impl App {
                             let profile_path: PathBuf = self
                                 .root_dir
                                 .join(format!("assets/profiles/{profile}.json"));
-                            match fs::read_to_string(&profile_path) {
-                                Ok(p) => {
-                                    self.loaded_player
-                                        .load_indexed_player(p)
-                                        .unwrap_or_else(|e| {
-                                            self.err = Some(e.into());
-                                        });
-                                    self.username = format!("{}#{}", pl[0], pl[1]);
-                                    self.region = match pl[2] {
-                                        "NA" => Regions::NA,
-                                        "EUW" => Regions::EUW,
-                                        "EUNE" => Regions::EUNE,
-                                        "KR" => Regions::KR,
-                                        "CN" => Regions::CN,
-                                        &_ => Regions::NONE,
-                                    };
-                                    self.state = State::Stats;
-                                }
-                                Err(e) => self.err = Some(e.into()),
+                            if let Ok(p) = fs::read_to_string(&profile_path) {
+                                self.loaded_player
+                                    .load_indexed_player(p)
+                                    .unwrap_or_else(|e| {
+                                        self.err = Some(e.into());
+                                    });
+                                self.username = format!("{}#{}", pl[0], pl[1]);
+                                self.region = match pl[2] {
+                                    "NA" => Regions::NA,
+                                    "EUW" => Regions::EUW,
+                                    "EUNE" => Regions::EUNE,
+                                    "KR" => Regions::KR,
+                                    "CN" => Regions::CN,
+                                    &_ => Regions::NONE,
+                                };
+                                self.state = State::Stats;
+                            } else {
+                                self.err =
+                                    Some(AppError::new("Could not find player file. Removing"));
+                                PlayerLoadCtx::remove_player_file(&self.root_dir, profile)
+                                    .expect("Could not open index file");
+                                self.update_index_players = true;
                             }
                         }
                     }

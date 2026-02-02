@@ -163,7 +163,6 @@ impl App {
     fn ui(&mut self, ctx: &egui::Context) {
         set_style(ctx);
         self.top_bar(ctx);
-        //CentralPanel::default().show(ctx, |vi| vi.heading("JadeStats"));
         self.draw_side_panel(ctx);
         self.draw_central_panel(ctx);
         ctx.request_repaint();
