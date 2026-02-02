@@ -4,10 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use analyzer_core::player::Player;
 use eframe::egui::CentralPanel;
-//use eframe::egui::Window;
 use egui::Context;
-use egui::ScrollArea;
-use egui::SidePanel;
 use egui::TextStyle;
 use egui::{FontFamily, FontId};
 
@@ -19,20 +16,60 @@ pub mod profiles_list;
 pub mod stats_display;
 pub mod stats_page;
 
+/// App structure that holds all relevant information for application UI. Holds display user info,
+/// window state, etc. which are edited throughout the lifetime of the program.
 pub struct App {
-    username: String, //player username as they would input, ie WhaleMilk#PHUD
+    ///Username of the player the user is looking for. Should follow the format {Username}#{Tag}.
+    ///For example: WhaleMilk#PHUD.
+    username: String,
+
+    ///Server Region selected by the player. When passed to the backend, this is tacked onto the
+    ///username with another #. Ex: WhaleMilk#PHUD#NA
     region: Regions,
+
+    /// The state of the UI. Tracks what is displayed when, mostly in central plane. See State
+    /// enumu
     state: State,
-    graph_dimensions: (usize, usize), //columns / rows
+
+    /// How many graphs are displayed in the Stats page. Default is 2x2. This currently does not
+    /// change.
+    graph_dimensions: (usize, usize),
+
+    ///Boolean value tracking whether or not a player has been attempted to load or not. If this is
+    ///true, but the program is in the state, then it knows to check for error and draw it only
+    ///once. Boolean is mostly for redrawing purposes.
     has_loaded: bool,
+
+    ///A list of players stored in ``./assets/indexed_players.json``. This is an effective list of
+    ///players who's full profile json files are saved to disk in ``./assets/players/``
     indexed_players: Vec<String>,
+
+    ///A boolean to check if the program needs to re-read ``./assets/indexed_players.json`` due to an
+    ///update of some kind.
+    update_index_players: bool,
+
+    ///The player that is loaded into memory for display on the stats page. This can either be
+    ///loaded from the stored json file or via the ``analyzer_core`` backend.
     loaded_player: Player,
+
+    ///Smart pointer for async loading of a player from ``analyzer_core``. This allows for the UI to
+    ///display a loading screen while ``analyzer_core`` waits for and parses large data sets from
+    ///Riot's API.
     player: Arc<Mutex<LoadingState<Player>>>,
+
+    /// A boolean value that checks if the program needs to start loading or not. If this flag is
+    /// set, the program spawns a thread for async loading of player from the backend.
     loading_started: bool,
+
+    /// Path to the root of project directory for finding assets folder easily.
     root_dir: PathBuf,
+
+    ///Tracks possible errors from either the front end itself or from the backend.
     err: Option<AppError>, // Error field that tracks if there is an error thrown by player interface
 }
 
+/// Enum which tracks the state of loading a player from ``analyzer_core``. Once loaded, we load a
+/// player in, and that is passed to the ``loaded_player`` field.
 pub enum LoadingState<T> {
     Dormant,
     Loading,
@@ -40,10 +77,8 @@ pub enum LoadingState<T> {
     Error(AppError),
 }
 
-pub struct SharedPlayer {
-    pub state: LoadingState<Player>,
-}
-
+/// Struct for passing data to ``analyzer_core`` asynchronously. This is needed to avoid passing
+/// &self to somewhere else while inside a closure.
 #[derive(Clone)]
 pub struct PlayerLoadCtx {
     pub username: String,
@@ -52,6 +87,8 @@ pub struct PlayerLoadCtx {
     pub indexed_players: Vec<String>,
 }
 
+/// Enum for describing window state. Each state has a different associated page for drawing on
+/// central plane and elsewhere.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 #[allow(dead_code, clippy::allow_attributes)]
 enum State {
@@ -105,6 +142,7 @@ impl Default for App {
             has_loaded: false,
             indexed_players: PlayerLoadCtx::read_indexed_players(&dir)
                 .expect("Could not read indexed players on initialization"),
+            update_index_players: false,
             loaded_player: Player::default(),
             player: Arc::new(Mutex::new(LoadingState::Dormant)),
             loading_started: false,
@@ -137,6 +175,11 @@ impl App {
 
     fn draw_central_panel(&mut self, ctx: &egui::Context) {
         /* drawing the central Panel w/ Graphs */
+        if self.update_index_players {
+            let temp = self.indexed_players.clone();
+            self.indexed_players =
+                PlayerLoadCtx::read_indexed_players(&self.root_dir).unwrap_or(temp);
+        }
         CentralPanel::default().show(ctx, |ui| match self.state {
             State::Home => {
                 self.player = Arc::new(Mutex::new(LoadingState::Dormant));

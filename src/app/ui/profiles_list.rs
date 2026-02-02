@@ -1,5 +1,8 @@
 use crate::ui::{App, AppError, Regions, State};
+use analyzer_core::player::Player;
 use egui::{Context, ScrollArea, SidePanel};
+use std::fs;
+use std::path::{Path, PathBuf};
 
 #[allow(clippy::indexing_slicing, clippy::allow_attributes)]
 impl App {
@@ -21,22 +24,30 @@ impl App {
                         //    .clicked()
                         //{
                         if ui.add(egui::Button::new(profile).frame(false)).clicked() {
-                            let p: Vec<&str> = profile.split('#').collect();
-                            if p.len() < 3 {
-                                return;
+                            let pl: Vec<&str> = profile.split('#').collect();
+                            let profile_path: PathBuf = self
+                                .root_dir
+                                .join(format!("assets/profiles/{profile}.json"));
+                            match fs::read_to_string(&profile_path) {
+                                Ok(p) => {
+                                    self.loaded_player
+                                        .load_indexed_player(p)
+                                        .unwrap_or_else(|e| {
+                                            self.err = Some(e.into());
+                                        });
+                                    self.username = format!("{}#{}", pl[0], pl[1]);
+                                    self.region = match pl[2] {
+                                        "NA" => Regions::NA,
+                                        "EUW" => Regions::EUW,
+                                        "EUNE" => Regions::EUNE,
+                                        "KR" => Regions::KR,
+                                        "CN" => Regions::CN,
+                                        &_ => Regions::NONE,
+                                    };
+                                    self.state = State::Stats;
+                                }
+                                Err(e) => self.err = Some(e.into()),
                             }
-                            self.username = format!("{}#{}", p[0], p[1]);
-                            self.region = match p[2] {
-                                "NA" => Regions::NA,
-                                "EUW" => Regions::EUW,
-                                "EUNE" => Regions::EUNE,
-                                "KR" => Regions::KR,
-                                "CN" => Regions::CN,
-                                &_ => Regions::NONE,
-                            };
-                            self.err = None;
-                            self.loading_started = false;
-                            self.state = State::Loading;
                         }
                     }
                 })

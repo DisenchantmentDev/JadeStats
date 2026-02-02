@@ -46,12 +46,9 @@ impl App {
                         ui.spinner();
                     });
                 });
-                //ui.vertical_centered_justified(|ui| {
-                //    ui.heading("Loading...");
-                //    ui.spinner();
-                //});
             }
             LoadingState::Loaded(player) => {
+                self.update_index_players = true;
                 self.loaded_player = player.clone();
                 self.has_loaded = true;
                 self.state = State::Stats;

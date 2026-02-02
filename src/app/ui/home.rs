@@ -9,38 +9,6 @@ use egui::Ui;
 
 impl App {
     pub fn home_central_panel(&mut self, ui: &mut Ui) {
-        //another ui element that we can fill with red color w/ text; separate from text box ui
-        //ui.vertical_centered(|ui| {
-        //    ui.add_space(ui.available_height() / 2.0 - 80.0);
-
-        //    ui.label("Enter Username");
-
-        //    // Allocate a centered horizontal area
-        //    ui.allocate_ui_with_layout(
-        //        egui::vec2(400.0, 30.0), // Adjust width as needed
-        //        egui::Layout::left_to_right(egui::Align::Center),
-        //        |ui| {
-        //            ui.text_edit_singleline(&mut self.username);
-        //            egui::ComboBox::from_id_salt("Region_Box")
-        //                .width(50.0)
-        //                .selected_text(format!("{:?}", self.region))
-        //                .show_ui(ui, |ui| {
-        //                    ui.selectable_value(&mut self.region, Regions::NA, "NA");
-        //                    ui.selectable_value(&mut self.region, Regions::EUW, "EUW");
-        //                    ui.selectable_value(&mut self.region, Regions::EUNE, "EUNE");
-        //                    ui.selectable_value(&mut self.region, Regions::KR, "KR");
-        //                    ui.selectable_value(&mut self.region, Regions::CN, "CN");
-        //                });
-        //        },
-        //    );
-
-        //    if ui.button("Go!").clicked() {
-        //        self.err = None;
-        //        self.loading_started = false;
-        //        self.state = State::Loading;
-        //    }
-        //});
-        //});
         ui.vertical_centered_justified(|ui| {
             ui.add_space(ui.available_height() / 2.5 - 80.0);
             ui.set_max_width(200.0);
@@ -97,6 +65,15 @@ impl App {
                         //self.player = Arc::new(Mutex::new(LoadingState::Dormant));
                         //self.has_loaded = false;
                         self.loading_started = false;
+                    }
+                    if self.state == State::Stats && ui.button("Reload player").clicked() {
+                        match self.loaded_player.load_new_games() {
+                            Ok(_) => {}
+                            Err(e) => {
+                                self.state = State::Home;
+                                self.err = Some(e.into());
+                            }
+                        }
                     }
                     if ui.button("Exit").clicked() {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Close);
