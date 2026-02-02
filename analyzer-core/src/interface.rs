@@ -37,11 +37,11 @@ impl Interface {
         raw_username: &str,
     ) -> Result<PlayerIdent, ApiError> {
         let p: Vec<&str> = raw_username.split("#").collect();
-        if p.len() > 3 {
+        println!("gen_player: {:?}", p);
+        if p.len() != 3 {
             return Err(ApiError::new("Incorrect format for inputted player"));
         }
-        println!("{:?}", p);
-        match p.get(2) {
+        match p.last() {
             Some(server) => {
                 self.server = String::from(*server);
                 self.request_player_data(
@@ -49,7 +49,9 @@ impl Interface {
                     String::from(*p.get(1).expect("Could not index player")),
                 )
             }
-            None => Err(ApiError::new("Incorrect format for inputted player")),
+            None => Err(ApiError::new(
+                "Incorrect format for inputted player; not enough fields",
+            )),
         }
         //self.server = String::from(p[2]);
         //self.request_player_data(String::from(p[0]).replace(" ", "%20"), String::from(p[1]))

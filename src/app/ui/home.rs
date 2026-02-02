@@ -12,13 +12,6 @@ impl App {
             if let Some(e) = &self.err {
                 let details = e.details.clone();
                 self.display_error_window(ctx, &details);
-                //ui.label(
-                //    RichText::new(format!(
-                //        "There was an error\nPlease try again\n{}",
-                //        &e.details
-                //    ))
-                //    .color(Color32::RED),
-                //);
             }
 
             ui.label("Enter Username");

@@ -18,6 +18,7 @@ impl App {
                     ui.separator();
                     for profile in &self.indexed_players {
                         if ui.add(egui::Button::new(profile).frame(false)).clicked() {
+                            self.err = None;
                             let pl: Vec<&str> = profile.split('#').collect();
                             let profile_path: PathBuf = self
                                 .root_dir
@@ -28,7 +29,11 @@ impl App {
                                     .unwrap_or_else(|e| {
                                         self.err = Some(e.into());
                                     });
-                                self.username = format!("{}#{}", pl[0], pl[1]);
+                                self.username = format!(
+                                    "{}#{}",
+                                    pl.first().expect("Failed to index"),
+                                    pl.get(1).expect("failed to index")
+                                );
                                 self.region = match pl[2] {
                                     "NA" => Regions::NA,
                                     "EUW" => Regions::EUW,
