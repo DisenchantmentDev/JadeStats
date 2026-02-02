@@ -8,7 +8,6 @@ use std::io::prelude::*;
 use std::path::{Path, PathBuf};
 
 use crate::app::app_error::AppError;
-use crate::ui::App;
 use crate::ui::PlayerLoadCtx;
 
 #[allow(clippy::allow_attributes, clippy::missing_errors_doc)]

@@ -1,8 +1,7 @@
 use crate::ui::{App, AppError, PlayerLoadCtx, Regions, State};
-use analyzer_core::player::Player;
 use egui::{Context, ScrollArea, SidePanel};
 use std::fs;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 #[allow(clippy::indexing_slicing, clippy::allow_attributes)]
 impl App {

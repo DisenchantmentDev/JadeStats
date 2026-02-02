@@ -1,6 +1,5 @@
 use egui::Ui;
-use egui_extras::{Size, StripBuilder};
-use egui_plot::{Line, Plot, PlotPoint, PlotPoints};
+use egui_plot::PlotPoint;
 
 use crate::ui::App;
 

@@ -1,8 +1,4 @@
-use project_root;
 use serde_derive::{Deserialize, Serialize};
-use serde_json;
-use std::fs;
-
 pub mod filter;
 pub mod items;
 
@@ -221,7 +217,7 @@ impl Games {
             csm: Self::find_csm(data, &side, &p_index),
             dpm: Self::find_dpm(data, &side, &p_index),
             kp: Self::find_kp(data, &side, &p_index),
-            wl: Self::find_wl(data, &side, &p_index),
+            wl: Self::find_wl(data, &side),
         }
         //todo!();
     }
@@ -395,7 +391,7 @@ impl Games {
         }
     }
 
-    fn find_wl(game: &RawData, side: &Side, p_index: &usize) -> bool {
+    fn find_wl(game: &RawData, side: &Side) -> bool {
         match side {
             Side::BLUE => game.win_loss.0,
             Side::RED => game.win_loss.1,

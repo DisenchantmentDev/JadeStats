@@ -1,5 +1,4 @@
 use crate::api_error::ApiError;
-use crate::data_processor::Game;
 use crate::data_processor::RawData;
 use crate::interface::Interface;
 use crate::interface::MatchData;
@@ -7,7 +6,6 @@ use crate::interface::Timeline;
 
 use serde::Deserialize;
 use serde_json::Deserializer;
-use std::error::Error;
 
 impl Interface {
     pub fn get_game_ids(

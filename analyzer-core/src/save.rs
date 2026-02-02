@@ -1,9 +1,12 @@
 use serde_derive::{Deserialize, Serialize};
 
-use crate::{data_processor::{GraphData, RawData, Games}, player::PlayerIdent};
+use crate::{
+    data_processor::{GraphData, RawData},
+    player::PlayerIdent,
+};
 
 #[derive(Default, Debug, Clone, Serialize, Deserialize)]
-pub struct Save{
+pub struct Save {
     pub player_info: PlayerIdent,
     pub data: PlayerData,
 }
@@ -12,12 +15,16 @@ pub struct Save{
 pub struct PlayerData {
     pub raw_data: Vec<RawData>,
     pub graph_data: Vec<GraphData>,
-    pub max_games: i64
+    pub max_games: i64,
 }
 
 impl PlayerData {
     fn default() -> PlayerData {
-        PlayerData { raw_data: Vec::default(), graph_data: Vec::default(), max_games: 20 }
+        PlayerData {
+            raw_data: Vec::default(),
+            graph_data: Vec::default(),
+            max_games: 20,
+        }
     }
 }
 
@@ -25,13 +32,13 @@ impl PlayerData {
 
 impl Save {
     pub fn new(iden: PlayerIdent) -> Save {
-        Save{
+        Save {
             player_info: iden,
-            data: PlayerData::default()
+            data: PlayerData::default(),
         }
     }
 
-    pub fn update_data(&mut self, games: Games) {
+    pub fn update_data(&mut self) {
         todo!()
     }
 }
