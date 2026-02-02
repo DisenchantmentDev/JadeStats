@@ -9,6 +9,7 @@ use egui::TextStyle;
 use egui::{FontFamily, FontId};
 
 use crate::app::app_error::AppError;
+pub mod error_window;
 pub mod home;
 pub mod loading;
 pub mod player_interface;
@@ -99,6 +100,7 @@ enum State {
     Loading,
 }
 
+/// A description of different graph displays that can be displayed on the Stats Page.
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Default)]
 #[allow(clippy::upper_case_acronyms, clippy::allow_attributes)]
 enum GraphType {
@@ -109,6 +111,7 @@ enum GraphType {
     KP,
 }
 
+/// The different available servers that can be pulled from
 #[derive(Debug, Default, PartialEq, Eq, Clone)]
 #[allow(clippy::upper_case_acronyms, clippy::allow_attributes)]
 pub enum Regions {
@@ -183,7 +186,7 @@ impl App {
             State::Home => {
                 self.player = Arc::new(Mutex::new(LoadingState::Dormant));
                 self.loaded_player = Player::default();
-                self.home_central_panel(ui);
+                self.home_central_panel(ctx, ui);
             }
 
             State::Stats => {
@@ -192,8 +195,6 @@ impl App {
                 } else {
                     self.state = State::Home;
                 }
-                //graph grid
-                //self.draw_stat_graph_strip(ui, sin, self.graph_dimensions);
             }
             State::Profile => {
                 let _temp = 100;

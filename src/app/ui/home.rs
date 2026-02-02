@@ -1,26 +1,24 @@
 use crate::ui::{App, Regions, State};
 use analyzer_core::player::Player;
-use egui::Color32;
 use egui::Context;
-use egui::RichText;
 use egui::TopBottomPanel;
 use egui::Ui;
-//use egui::{Color32, RichText};
 
 impl App {
-    pub fn home_central_panel(&mut self, ui: &mut Ui) {
+    pub fn home_central_panel(&mut self, ctx: &Context, ui: &mut Ui) {
         ui.vertical_centered_justified(|ui| {
             ui.add_space(ui.available_height() / 2.5 - 80.0);
             ui.set_max_width(200.0);
-            //TODO: if there is an error, draw a rich text above everything, maybe in a red box?
             if let Some(e) = &self.err {
-                ui.label(
-                    RichText::new(format!(
-                        "There was an error\nPlease try again\n{}",
-                        &e.details
-                    ))
-                    .color(Color32::RED),
-                );
+                let details = e.details.clone();
+                self.display_error_window(ctx, &details);
+                //ui.label(
+                //    RichText::new(format!(
+                //        "There was an error\nPlease try again\n{}",
+                //        &e.details
+                //    ))
+                //    .color(Color32::RED),
+                //);
             }
 
             ui.label("Enter Username");
@@ -43,14 +41,12 @@ impl App {
                     self.err = None;
                     self.loading_started = false;
                     self.state = State::Loading;
-                    //self.state = State::Stats;
                 }
             });
             if ui.button("Go!").clicked() {
                 self.err = None;
                 self.loading_started = false;
                 self.state = State::Loading;
-                //self.state = State::Stats;
             }
         });
     }
@@ -62,8 +58,6 @@ impl App {
                     if ui.button("To Home").clicked() {
                         self.state = State::Home;
                         self.loaded_player = Player::default();
-                        //self.player = Arc::new(Mutex::new(LoadingState::Dormant));
-                        //self.has_loaded = false;
                         self.loading_started = false;
                     }
                     if self.state == State::Stats && ui.button("Reload player").clicked() {

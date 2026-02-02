@@ -16,12 +16,7 @@ impl App {
                     let _available_width = ui.available_width();
                     ui.heading("Profiles");
                     ui.separator();
-                    //ui.add(egui::Label::new("text").sense(egui::Sense::click()))
                     for profile in &self.indexed_players {
-                        //if ui
-                        //    .add(egui::Label::new(profile).sense(egui::Sense::click()))
-                        //    .clicked()
-                        //{
                         if ui.add(egui::Button::new(profile).frame(false)).clicked() {
                             let pl: Vec<&str> = profile.split('#').collect();
                             let profile_path: PathBuf = self

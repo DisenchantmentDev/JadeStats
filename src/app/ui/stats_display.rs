@@ -1,17 +1,12 @@
 use egui::{Color32, Ui};
 use egui_extras::{Size, StripBuilder};
-use egui_plot::{Legend, Line, MarkerShape, Plot, PlotPoint, PlotPoints, Points};
+use egui_plot::{Legend, Line, LineStyle, MarkerShape, Plot, PlotPoint, PlotPoints, Points};
 use std::vec::Vec;
 
 use crate::ui::App;
 use crate::ui::GraphType;
 
-//impl From<Vec<PlotPoint>> for PlotPoints<'_> {
-//    fn from(p: Vec<PlotPoint>) -> Self {
-//        p.iter().enumerate().map(|i| i).collect()
-//    }
-//}
-
+#[allow(clippy::indexing_slicing, clippy::allow_attributes)]
 impl App {
     pub fn draw_stat_graph_strip(
         &mut self,
@@ -36,11 +31,14 @@ impl App {
                 .allow_boxed_zoom(false)
                 .allow_zoom(false)
                 .allow_drag(false)
+                .allow_scroll(false)
                 .cursor_color(Color32::TRANSPARENT)
                 .legend(plot_legend)
                 .show(ui, |plot_ui| {
                     plot_ui.line(
-                        Line::new(&curve_name, PlotPoints::Borrowed(&plots)).name(&curve_name),
+                        Line::new(&curve_name, PlotPoints::Borrowed(&plots))
+                            .name(&curve_name)
+                            .style(LineStyle::Solid),
                     );
                     let p: PlotPoints<'_> = plots.clone().iter().map(|i| [i.x, i.y]).collect();
                     let markers = Points::new(&curve_name, p)

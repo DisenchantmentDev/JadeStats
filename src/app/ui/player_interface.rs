@@ -28,9 +28,6 @@ impl PlayerLoadCtx {
                 Self::remove_player_file(&self.root_dir, &raw_username)?;
                 return Err(AppError::new("Player file could not be found"));
             }
-            //loaded_player.set_api(api_key);
-            //let player_as_str = fs::read_to_string(profile_path.clone())?;
-            //loaded_player.load_indexed_player(player_as_str)?;
         } else {
             loaded_player = Player::new(raw_username.as_str(), api_key)?;
             Self::update_index_file(&self.root_dir, raw_username.clone())?;
@@ -53,13 +50,11 @@ impl PlayerLoadCtx {
 
     pub fn read_indexed_players(root: &Path) -> Result<Vec<String>, Error> {
         let indexed_profile_path = root.join("assets/profile_index.json");
-        //println!("Read indexed players path: {:?}", indexed_profile_path);
         #[derive(Serialize, Deserialize, Debug)]
         struct Temp {
             profiles: Vec<String>,
         }
         let mut buf = String::new();
-        //println!("Path: {:?}", indexed_profile_path);
         OpenOptions::new()
             .read(true)
             .open(indexed_profile_path)?
@@ -75,7 +70,6 @@ impl PlayerLoadCtx {
 
     fn update_index_file(root: &Path, player: String) -> Result<(), Error> {
         let indexed_profile_path = root.join("assets/profile_index.json");
-        //println!("Update indexed players path: {:?}", indexed_profile_path);
         #[derive(Serialize, Deserialize)]
         struct Temp {
             profiles: Vec<String>,
@@ -83,7 +77,6 @@ impl PlayerLoadCtx {
 
         let mut indexed = Self::read_indexed_players(root)?;
         indexed.push(player);
-        //let updated = Temp { profiles: indexed };
         let serialized = serde_json::to_string(&Temp { profiles: indexed })?;
         let mut file = OpenOptions::new()
             .write(true)
