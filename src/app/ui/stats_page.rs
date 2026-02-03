@@ -47,6 +47,7 @@ impl App {
             //username label
             let max_width = ui.available_width();
             ui.set_max_width(200.0);
+            //call player_info_display(ui) instead
             ui.label(format!(
                 "Current user:\n{} ({:?})",
                 self.username, self.region
@@ -56,5 +57,9 @@ impl App {
             ui.set_max_width(max_width);
             self.draw_stat_graph_strip(ui, &graphs, self.graph_dimensions);
         });
+    }
+
+    pub fn player_info_display(&mut self, ui: &mut Ui) {
+        todo!()
     }
 }

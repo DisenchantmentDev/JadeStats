@@ -169,10 +169,6 @@ impl App {
         self.draw_side_panel(ctx);
         self.draw_central_panel(ctx);
         ctx.request_repaint();
-
-        //Window::new("TestWindow").show(ctx, |ui| {
-        //    ui.label("Test Window");
-        //});
     }
 
     fn draw_central_panel(&mut self, ctx: &egui::Context) {

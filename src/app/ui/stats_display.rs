@@ -33,7 +33,15 @@ impl App {
                 .allow_drag(false)
                 .allow_scroll(false)
                 .cursor_color(Color32::TRANSPARENT)
+                .show_grid(false)
                 .legend(plot_legend)
+                .label_formatter(|name, value| {
+                    if !name.is_empty() {
+                        format!("{name}: {:.2}", value.y)
+                    } else {
+                        String::new()
+                    }
+                })
                 .show(ui, |plot_ui| {
                     plot_ui.line(
                         Line::new(&curve_name, PlotPoints::Borrowed(&plots))
